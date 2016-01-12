@@ -13,7 +13,7 @@ ServerClient::~ServerClient()
 void* ServerClient::run(void* thisPtr)
 {
     ((ServerClient*) thisPtr)->thread();
-    delete thisPtr;
+    delete ((ServerClient*) thisPtr);
     return nullptr;
 }
 

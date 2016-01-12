@@ -18,32 +18,12 @@ public:
     {
         perror(message.c_str());
     }
-    
-    //perror(message.c_str());
-    
 };
 
+using namespace SiTNetwork;
 
 int main(int argc , char *argv[])
 {
-    //system("cd /home/dzhekson6000/workspace/SiTEngineServerCore/test/ && "
-    //        "git clone https://github.com/Dzhekson6000/SiTEngineSite");
-    
-    /*
-    pthread_t tid;
-    Server server(8000);
-    pthread_create(&tid, NULL, Server::run, &server);
-    
-    char cmd[20];
-    while (true) {
-        scanf("%20s",cmd);
-        if(strcmp(cmd,"stop") == 0)
-        {
-            server.stop();
-            return 0;
-        }
-    }*/
-    
     LogDeb logDeb;
     
     pthread_t tid;

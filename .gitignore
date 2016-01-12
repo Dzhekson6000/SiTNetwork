@@ -49,7 +49,3 @@ Generated Files
 AppPackages
 SubmissionInfo
 *.hps
-
-#ignore test files
-/Classes/*
-Resources/

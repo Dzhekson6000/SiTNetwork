@@ -1,26 +1,24 @@
 #include "Network/Server/Server.h"
-#include <sys/socket.h>
-#include <unistd.h>
+#include "Network/Socket.h"
+
+using namespace SiTNetwork;
 
 Server::Server():
-_port(DEFAULT_PORT),
+_port(0),
 _onLogFunc(nullptr),
 _onLogErrorFunc(nullptr),
-_isClose(false),
-_requestsCount(0)
+_isClose(false)
 {}
 
 Server::Server(int port):
 _port(port),
 _onLogFunc(nullptr),
 _onLogErrorFunc(nullptr),
-_isClose(false),
-_requestsCount(0)
+_isClose(false)
 {}
 
 Server::~Server()
 {
-    
 }
 
 void* Server::run(void* thisPtr)
@@ -30,40 +28,17 @@ void* Server::run(void* thisPtr)
 }
 
 void Server::start()
-{    
-    const int on = 1;
-    
-    _socket = socket(AF_INET , SOCK_STREAM , 0);
-    
-    if (_socket == -1)
+{
+    Socket socket(8000);
+    socket.setTypeProtocol(Socket::TYPE_PROTOCOL::TCP);
+    socket.setTypeSocket(Socket::TYPE_SOCKET::SERVER);
+    if(!socket.create())
     {
-        logError("Could not create socket");
-        return;
-    }
-    log("Socket created");
-    
-    bzero(&_server, sizeof(_server));
-    _server.sin_family = AF_INET;
-    _server.sin_addr.s_addr = INADDR_ANY;
-    _server.sin_port = htons(_port);
-    
-    setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on);
-    
-    if( bind(_socket,(struct sockaddr*)&_server , sizeof(_server)) < 0)
-    {
-        logError("bind failed. Error");
-        return;
-    }
-    log("bind done");
-    
-    
-    if (listen(_socket , DEFAULT_LISTEN_LEN) < 0 ) {
-        logError("listen. Error");
+        logError(socket.getLog());
         return;
     }
     
     int clientSocket;
-    
     struct sockaddr_in clientAddr;
     socklen_t len;
     char buffer[INET_ADDRSTRLEN];
@@ -71,18 +46,14 @@ void Server::start()
     while(!_isClose)
     {
         len = sizeof(clientAddr);
-        clientSocket = accept(_socket, (struct sockaddr*)&clientAddr, &len);
+        clientSocket = accept(socket.getSocket(), (struct sockaddr*)&clientAddr, &len);
         if(clientSocket < 0)
         {
             logError("Accept error");
             return;
         }
         newClient(clientSocket);
-        _requestsCount++;
-        
-        
     }
-    close(_socket);
 }
 
 void Server::stop()
