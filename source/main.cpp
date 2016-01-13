@@ -1,5 +1,6 @@
 #include <stdlib.h> 
 #include "Network/Server/Server.h"
+#include <thread>
 
 class LogDeb
 {
@@ -22,10 +23,9 @@ int main(int argc , char *argv[])
 {
     LogDeb logDeb;
     
-    pthread_t tid;
     Server server(8000);
     server.setLogFunc(NET_CALLBACK_1(LogDeb::Log, logDeb));
-    pthread_create(&tid, NULL, Server::run, &server);
+    std::thread(&Server::run, &server).detach();
     
     char cmd[20];
     while (true) {

@@ -1,9 +1,10 @@
 #include "Network/Server/ServerClient.h"
+#include <thread>
 
 ServerClient::ServerClient(int clientSocket):
 _clientSocket(clientSocket)
 {
-    pthread_create(&_tid, NULL, ServerClient::run, this);//if != 0 to error
+    std::thread(&ServerClient::run, this).detach();
 }
 
 ServerClient::~ServerClient()
