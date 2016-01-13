@@ -13,7 +13,6 @@ namespace SiTNetwork
 {
 
 typedef std::function<void(std::string)> OnLogFunc;
-typedef std::function<void(std::string)> OnLogErrorFunc;
 typedef std::function<void(int clientSocket)> OnNewClientFunc;
 
     class Server {
@@ -24,7 +23,6 @@ typedef std::function<void(int clientSocket)> OnNewClientFunc;
         void start();
         void stop();
         void setLogFunc(OnLogFunc onLogFunc);
-        void setLogErrorFunc(OnLogErrorFunc onLogErrorFunc);
 
         void setNewClientFunc(OnNewClientFunc onNewClientFunc);
 
@@ -38,7 +36,6 @@ typedef std::function<void(int clientSocket)> OnNewClientFunc;
         void newClient(int clientSocket); 
 
         OnLogFunc _onLogFunc;
-        OnLogErrorFunc _onLogErrorFunc;
         OnNewClientFunc _onNewClientFunc;
     };
 }

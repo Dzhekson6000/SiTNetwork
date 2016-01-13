@@ -6,14 +6,12 @@ using namespace SiTNetwork;
 Server::Server():
 _port(0),
 _onLogFunc(nullptr),
-_onLogErrorFunc(nullptr),
 _isClose(false)
 {}
 
 Server::Server(int port):
 _port(port),
 _onLogFunc(nullptr),
-_onLogErrorFunc(nullptr),
 _isClose(false)
 {}
 
@@ -32,16 +30,11 @@ void Server::start()
     Socket socket(8000);
     socket.setTypeProtocol(Socket::TYPE_PROTOCOL::TCP);
     socket.setTypeSocket(Socket::TYPE_SOCKET::SERVER);
-    if(!socket.create())
-    {
-        logError(socket.getLog());
-        return;
-    }
+    socket.create();
     
     int clientSocket;
     struct sockaddr_in clientAddr;
     socklen_t len;
-    char buffer[INET_ADDRSTRLEN];
     
     while(!_isClose)
     {
@@ -49,8 +42,7 @@ void Server::start()
         clientSocket = accept(socket.getSocket(), (struct sockaddr*)&clientAddr, &len);
         if(clientSocket < 0)
         {
-            logError("Accept error");
-            return;
+            throw RuntimeError("Accept error");
         }
         newClient(clientSocket);
     }
@@ -64,11 +56,6 @@ void Server::stop()
 void Server::log(std::string message)
 {
     if(_onLogFunc)_onLogFunc(message);
-}
-
-void Server::logError(std::string message)
-{
-    if(_onLogErrorFunc)_onLogErrorFunc(message);
 }
 
 void Server::newClient(int clientSocket)
@@ -87,9 +74,4 @@ void Server::setNewClientFunc(OnNewClientFunc onNewClientFunc)
 void Server::setLogFunc(OnLogFunc onLogFunc)
 {
     _onLogFunc = onLogFunc;
-}
-
-void Server::setLogErrorFunc(OnLogErrorFunc onLogErrorFunc)
-{
-    _onLogErrorFunc = onLogErrorFunc;
 }

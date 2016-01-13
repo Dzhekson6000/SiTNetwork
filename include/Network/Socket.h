@@ -2,6 +2,7 @@
 #define SOCKET_H
 
 #include <string>
+#include "RuntimeError.h"
 
 #ifdef WINDOWS
 #include <winsock2.h> 
@@ -36,9 +37,8 @@ namespace SiTNetwork
         Socket(const char *host, int port);
         virtual ~Socket();
         
-        bool create();
+        void create() throw(RuntimeError);
         SOCKET getSocket();
-        std::string getLog();
         
         void setTypeSocket(TYPE_SOCKET type_socket);
         void setTypeProtocol(TYPE_PROTOCOL type_protocol);
@@ -52,8 +52,6 @@ namespace SiTNetwork
         
         TYPE_SOCKET _type_socket;
         TYPE_PROTOCOL _type_protocol;
-        
-        std::string _log;
         
         void createAddres();
         unsigned long getHostAddress(const char* host);

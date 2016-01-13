@@ -5,11 +5,11 @@
 
 using namespace SiTNetwork;
 
-Socket::Socket():_socket(0), _host(nullptr),_port(DEFAULT_PORT),_log(""){}
+Socket::Socket():_socket(0), _host(nullptr),_port(DEFAULT_PORT){}
 
-Socket::Socket(int port):_socket(0),_host(nullptr),_port(port),_log(""){}
+Socket::Socket(int port):_socket(0),_host(nullptr),_port(port){}
 
-Socket::Socket(const char *host, int port):_socket(0),_host(host),_port(port),_log(""){}
+Socket::Socket(const char *host, int port):_socket(0),_host(host),_port(port){}
 
 Socket::~Socket()
 {
@@ -20,13 +20,13 @@ Socket::~Socket()
 #endif
 }
 
-bool Socket::create()
+void Socket::create() throw(RuntimeError)
 {
 #ifdef _WIN32
     WSADATA         WsaData;  
     int err = WSAStartup (0x0101, &WsaData);
     if(err!=0)  
-        return false;
+        throw RuntimeError();
 #endif
     
     switch(_type_protocol)
@@ -45,8 +45,7 @@ bool Socket::create()
     if (_socket == -1)
 #endif
     {
-        _log = "Could not create socket";
-        return false;
+        throw RuntimeError("Could not create socket");
     }
     
     createAddres();
@@ -58,22 +57,19 @@ bool Socket::create()
             const int on = 1;
             if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on) == -1)
             {
-                _log = "setsockopt(SO_REUSEADDR) failed";
-                return false;
+                throw RuntimeError("setsockopt(SO_REUSEADDR) failed");
             }
 
             if( bind(_socket,(struct sockaddr*)&_socketaddr , sizeof(_socketaddr)) < 0)
             {
-                _log = "bind failed. Error";
-                return false;
+                throw RuntimeError("bind failed. Error");
             }
 
             if(_type_protocol == TCP)
             {
                 if (listen(_socket , DEFAULT_LISTEN_LEN) < 0 )
                 {
-                    _log = "listen. Error";
-                    return false;
+                    throw RuntimeError("listen. Error");
                 }
             }
         }
@@ -84,15 +80,12 @@ bool Socket::create()
             {
                 if(connect(_socket,(sockaddr*)&_socketaddr, sizeof(_socketaddr)))  
                 {
-                    _log = "connect failed";
-                    return false;  
+                    throw RuntimeError("connect failed");
                 }	
             }   
         }
         break;
     }
-    _log = "OK";
-    return true;
 }
 
 void Socket::createAddres()
@@ -120,8 +113,7 @@ unsigned long Socket::getHostAddress(const char* host)
 	phe = gethostbyname(host);  
 	if(phe==NULL) 
 	{
-		_log = "failed in gethostbyname";
-		return 0;  
+		throw RuntimeError("failed in gethostbyname");
 	}
 	p = *phe->h_addr_list;  
 	return *((unsigned long*)p);  
@@ -143,9 +135,4 @@ void Socket::setTypeProtocol(TYPE_PROTOCOL type_protocol)
 void Socket::setTypeSocket(TYPE_SOCKET type_socket)
 {
     _type_socket = type_socket;
-}
-
-std::string Socket::getLog()
-{
-    return _log;
 }

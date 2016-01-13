@@ -14,10 +14,6 @@ public:
         perror(message.c_str());
     }
     
-    void LogError(std::string message)
-    {
-        perror(message.c_str());
-    }
 };
 
 using namespace SiTNetwork;
@@ -29,7 +25,6 @@ int main(int argc , char *argv[])
     pthread_t tid;
     Server server(8000);
     server.setLogFunc(NET_CALLBACK_1(LogDeb::Log, logDeb));
-    server.setLogErrorFunc(NET_CALLBACK_1(LogDeb::LogError, logDeb));
     pthread_create(&tid, NULL, Server::run, &server);
     
     char cmd[20];
