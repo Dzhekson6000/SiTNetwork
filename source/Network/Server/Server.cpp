@@ -1,5 +1,4 @@
 #include "Network/Server/Server.h"
-#include "Network/Socket.h"
 
 using namespace SiTNetwork;
 
@@ -27,24 +26,17 @@ void* Server::run(void* thisPtr)
 
 void Server::start()
 {
-    Socket socket(8000);
+    Socket socket(_port);
     socket.setTypeProtocol(Socket::TYPE_PROTOCOL::TCP);
     socket.setTypeSocket(Socket::TYPE_SOCKET::SERVER);
     socket.create();
     
-    int clientSocket;
-    struct sockaddr_in clientAddr;
-    socklen_t len;
+    Socket socketClient = Socket();
     
     while(!_isClose)
     {
-        len = sizeof(clientAddr);
-        clientSocket = accept(socket.getSocket(), (struct sockaddr*)&clientAddr, &len);
-        if(clientSocket < 0)
-        {
-            throw RuntimeError("Accept error");
-        }
-        newClient(clientSocket);
+        socketClient.accept(socket);
+        newClient(socketClient);
     }
 }
 
@@ -58,12 +50,12 @@ void Server::log(std::string message)
     if(_onLogFunc)_onLogFunc(message);
 }
 
-void Server::newClient(int clientSocket)
+void Server::newClient(Socket socketClient)
 {
     if(_onNewClientFunc)
-        _onNewClientFunc(clientSocket);
+        _onNewClientFunc(socketClient);
     else
-        new ServerClient(clientSocket);
+        new ServerClient(socketClient);
 }
 
 void Server::setNewClientFunc(OnNewClientFunc onNewClientFunc)

@@ -1,8 +1,10 @@
 #include "Network/Server/ServerClient.h"
 #include <thread>
 
-ServerClient::ServerClient(int clientSocket):
-_clientSocket(clientSocket)
+using namespace SiTNetwork;
+
+ServerClient::ServerClient(Socket socketClient):
+_socketClient(socketClient)
 {
     std::thread(&ServerClient::run, this).detach();
 }

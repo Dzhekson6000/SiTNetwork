@@ -13,7 +13,7 @@ namespace SiTNetwork
 {
 
 typedef std::function<void(std::string)> OnLogFunc;
-typedef std::function<void(int clientSocket)> OnNewClientFunc;
+typedef std::function<void(Socket clientSocket)> OnNewClientFunc;
 
     class Server {
     public:
@@ -33,7 +33,7 @@ typedef std::function<void(int clientSocket)> OnNewClientFunc;
         static void startServer(int port);
         void log(std::string message);
         void logError(std::string message);
-        void newClient(int clientSocket); 
+        void newClient(Socket socketClient); 
 
         OnLogFunc _onLogFunc;
         OnNewClientFunc _onNewClientFunc;

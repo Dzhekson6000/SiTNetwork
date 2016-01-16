@@ -38,7 +38,11 @@ namespace SiTNetwork
         virtual ~Socket();
         
         void create() throw(RuntimeError);
-        SOCKET getSocket();
+        void close();
+        Socket* accept(const Socket& socket);
+        SOCKET getSocket() const;
+        
+        void setSocket(SOCKET socket);
         
         void setTypeSocket(TYPE_SOCKET type_socket);
         void setTypeProtocol(TYPE_PROTOCOL type_protocol);

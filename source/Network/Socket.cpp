@@ -13,11 +13,7 @@ Socket::Socket(const char *host, int port):_socket(0),_host(host),_port(port){}
 
 Socket::~Socket()
 {
-#ifdef _WIN32
-	closesocket(_socket);
-#else
-	close(_socket);
-#endif
+    close();
 }
 
 void Socket::create() throw(RuntimeError)
@@ -40,13 +36,18 @@ void Socket::create() throw(RuntimeError)
     }
  
 #ifdef _WIN32
-    if (_socket == INVALID_SOCKET)  
+    if (_socket == INVALID_SOCKET)
+    {
+        WSACleanup();
+        throw RuntimeError("Could not create socket");
+    }
 #else
     if (_socket == -1)
-#endif
     {
         throw RuntimeError("Could not create socket");
     }
+#endif  
+    
     
     createAddres();
 
@@ -62,6 +63,10 @@ void Socket::create() throw(RuntimeError)
 
             if( bind(_socket,(struct sockaddr*)&_socketaddr , sizeof(_socketaddr)) < 0)
             {
+                close();
+#ifdef _WIN32
+                WSACleanup();
+#endif
                 throw RuntimeError("bind failed. Error");
             }
 
@@ -69,6 +74,10 @@ void Socket::create() throw(RuntimeError)
             {
                 if (listen(_socket , DEFAULT_LISTEN_LEN) < 0 )
                 {
+                    close();
+#ifdef _WIN32
+                    WSACleanup();
+#endif
                     throw RuntimeError("listen. Error");
                 }
             }
@@ -80,11 +89,32 @@ void Socket::create() throw(RuntimeError)
             {
                 if(connect(_socket,(sockaddr*)&_socketaddr, sizeof(_socketaddr)))  
                 {
+                    close();
                     throw RuntimeError("connect failed");
                 }	
             }   
         }
         break;
+    }
+}
+
+void Socket::close()
+{
+#ifdef _WIN32
+    closesocket(_socket);
+#else
+    ::close(_socket);
+#endif
+}
+
+Socket* Socket::accept(const Socket& socket)
+{
+    socklen_t len;
+    len = sizeof(_socketaddr);
+    _socket = ::accept(socket.getSocket(), (struct sockaddr*)&_socketaddr, &len);
+    if(_socket < 0)
+    {
+        throw RuntimeError("Accept error");
     }
 }
 
@@ -119,11 +149,18 @@ unsigned long Socket::getHostAddress(const char* host)
 	return *((unsigned long*)p);  
 }
 
-SOCKET Socket::getSocket() {
+SOCKET Socket::getSocket() const
+{
     return _socket;
 }
 
-void Socket::setHost(const char* host) {
+void Socket::setSocket(SOCKET socket)
+{
+    _socket = socket;
+}
+
+void Socket::setHost(const char* host)
+{
     _host = host;
 }
 
