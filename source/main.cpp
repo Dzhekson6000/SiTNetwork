@@ -1,6 +1,8 @@
 #include <stdlib.h> 
 #include "Network/Server/Server.h"
 #include <thread>
+#include "Http/HttpRequest.h"
+#include "Http/HttpResponse.h"
 
 class LogDeb
 {
@@ -21,6 +23,18 @@ using namespace SiTNetwork;
 
 int main(int argc , char *argv[])
 {
+    std::string str = "HTTP/1.1 200 OK"
+            "Host: site.com\r\n"
+            "Content-Type: text/html; charset=UTF-8\r\n"
+            "Connection: close\r\n"
+            "Content-Length: 21\r\n"
+            "\r\n"
+            "<h1>Test page...</h1>";
+    
+    
+    HttpResponse hr = HttpResponse();
+    hr.parse(str);
+    
     LogDeb logDeb;
     
     Server server(8000);
