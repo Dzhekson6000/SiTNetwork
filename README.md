@@ -5,3 +5,5 @@ Socket C++ lib.
 Platform:
 Windows:-
 Linux:+
+Android:-
+iOS:-
