@@ -99,7 +99,6 @@ void Socket::create() throw(RuntimeError)
 
 void Socket::close()
 {
-    throw RuntimeError("close");
 #ifdef _WIN32
     closesocket(_socket);
 #else
