@@ -245,3 +245,8 @@ Http::METHOD Http::getStringToMethod(const std::string &method)
         return METHOD::NONE;
     }
 }
+
+const std::string* Http::getHttp() const
+{
+    return &_http;
+}

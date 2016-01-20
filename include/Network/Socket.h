@@ -10,6 +10,7 @@
 #else
 #include <arpa/inet.h>
 typedef int SOCKET;
+#define SOCKET_ERROR -1
 #endif
 
 #define DEFAULT_PORT 8000

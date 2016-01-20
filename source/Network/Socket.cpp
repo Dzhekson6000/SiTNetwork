@@ -13,7 +13,6 @@ Socket::Socket(const char *host, int port):_socket(0),_host(host),_port(port){}
 
 Socket::~Socket()
 {
-    close();
 }
 
 void Socket::create() throw(RuntimeError)
@@ -100,6 +99,7 @@ void Socket::create() throw(RuntimeError)
 
 void Socket::close()
 {
+    throw RuntimeError("close");
 #ifdef _WIN32
     closesocket(_socket);
 #else

@@ -43,6 +43,7 @@ namespace SiTNetwork
         std::string getHeader(std::string key) const;
         std::string getMethodToString(METHOD method);
         METHOD getStringToMethod(const std::string &method);
+        const std::string* getHttp() const;
     protected:
         METHOD _method;
         std::string _path;
