@@ -30,9 +30,7 @@ typedef std::function<void(Socket clientSocket)> OnNewClientFunc;
     private:    
         int _port;
         bool _isClose;
-        static void startServer(int port);
         void log(std::string message);
-        void logError(std::string message);
         void newClient(Socket socketClient); 
 
         OnLogFunc _onLogFunc;

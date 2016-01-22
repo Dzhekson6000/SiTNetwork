@@ -5,14 +5,20 @@ using namespace SiTNetwork;
 
 HttpSocketClient::HttpSocketClient()
 {
+    setTypeProtocol(Socket::TYPE_PROTOCOL::TCP);
+    setTypeSocket(Socket::TYPE_SOCKET::CLIENT);
 }
 
 HttpSocketClient::HttpSocketClient(int port):Socket(port)
 {
+    setTypeProtocol(Socket::TYPE_PROTOCOL::TCP);
+    setTypeSocket(Socket::TYPE_SOCKET::CLIENT);
 }
 
 HttpSocketClient::HttpSocketClient(const char* host, int port):Socket(host,port)
 {
+    setTypeProtocol(Socket::TYPE_PROTOCOL::TCP);
+    setTypeSocket(Socket::TYPE_SOCKET::CLIENT);
 }
 
 HttpSocketClient::~HttpSocketClient()

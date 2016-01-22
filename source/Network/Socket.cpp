@@ -142,7 +142,7 @@ unsigned long Socket::getHostAddress(const char* host)
 	phe = gethostbyname(host);  
 	if(phe==NULL) 
 	{
-		throw RuntimeError("failed in gethostbyname");
+            throw RuntimeError("failed in gethostbyname");
 	}
 	p = *phe->h_addr_list;  
 	return *((unsigned long*)p);  
