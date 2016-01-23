@@ -51,6 +51,13 @@ find_package (Threads)
 SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 #--------------------------------------------------------------------
+# Set OpenSSL.
+#--------------------------------------------------------------------
+find_package (OpenSSL)
+SET( HEADERS ${HEADERS} ${OPENSSL_INCLUDE_DIR})
+SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} ${OPENSSL_LIBRARIES})
+
+#--------------------------------------------------------------------
 # Compile
 #--------------------------------------------------------------------
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -o0 -g3 -std=c++11")
