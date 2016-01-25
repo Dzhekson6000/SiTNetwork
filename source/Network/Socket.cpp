@@ -3,16 +3,50 @@
 #include <unistd.h>
 #include <netdb.h>
 
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 using namespace SiTNetwork;
 
-Socket::Socket():_socket(0), _host(nullptr),_port(DEFAULT_PORT){}
+Socket::Socket():_socket(0), _host(nullptr),_port(DEFAULT_PORT),_isUseSSL(false){}
 
-Socket::Socket(int port):_socket(0),_host(nullptr),_port(port){}
+Socket::Socket(int port):_socket(0),_host(nullptr),_port(port),_isUseSSL(false){}
 
-Socket::Socket(const char *host, int port):_socket(0),_host(host),_port(port){}
+Socket::Socket(const char *host, int port):_socket(0),_host(host),_port(port),_isUseSSL(false){}
 
 Socket::~Socket()
 {
+}
+
+void Socket::initializeSSL()
+{
+    const SSL_METHOD* meth;
+    
+    SSLeay_add_ssl_algorithms();
+    switch(_type_socket)
+    {
+        case SERVER:
+            meth = SSLv23_server_method();
+        break;
+        case CLIENT:
+            meth = TLS_client_method();
+        break;
+    }
+    
+    SSL_load_error_strings();
+    _ctx = SSL_CTX_new(meth);
+    if (_ctx==NULL)
+        throw RuntimeError("failed initialize OpenSSL");
+}
+
+void Socket::destroySSL()
+{
+    SSL_shutdown (_ssl);
+    SSL_free (_ssl);
+    SSL_CTX_free (_ctx);
 }
 
 void Socket::create() throw(RuntimeError)
@@ -41,7 +75,7 @@ void Socket::create() throw(RuntimeError)
         throw RuntimeError("Could not create socket");
     }
 #else
-    if (_socket == -1)
+    if (_socket == SOCKET_ERROR)
     {
         throw RuntimeError("Could not create socket");
     }
@@ -90,7 +124,20 @@ void Socket::create() throw(RuntimeError)
                 {
                     close();
                     throw RuntimeError("connect failed");
-                }	
+                }
+                if(_isUseSSL)
+                {
+                    _ssl = SSL_new (_ctx);
+                    if (_ssl==NULL)
+                        throw RuntimeError("SSL connect failed");
+                    SSL_set_fd (_ssl, _socket);
+                    if(SSL_connect (_ssl) == SOCKET_ERROR)
+                    {
+                        throw RuntimeError("SSL connect failed");
+                    }
+                    
+                    //next get clients certificate
+                }
             }   
         }
         break;
@@ -172,3 +219,42 @@ void Socket::setTypeSocket(TYPE_SOCKET type_socket)
 {
     _type_socket = type_socket;
 }
+
+ssize_t Socket::send(const void* buffer, size_t n, int flags)
+{
+    ssize_t ret;
+    if(_isUseSSL)
+    {
+        ret = SSL_write(_ssl, buffer, n);
+    }
+    else
+    {
+        ret = ::send(getSocket(), buffer, n, flags);
+    }
+    
+    if (ret == SOCKET_ERROR)
+    {
+        throw RuntimeError("send failed");
+    }
+    return ret;
+}
+
+ssize_t Socket::read(void* buffer, size_t n, int flags)
+{
+    ssize_t ret;
+    if(_isUseSSL)
+    {
+        ret = SSL_read(_ssl, buffer, n);
+    }
+    else
+    {
+        ret = recv(getSocket(), buffer, n, flags);
+    }
+    
+    if (ret == SOCKET_ERROR)
+    {
+        close();
+        throw RuntimeError("read failed");
+    }
+}
+
