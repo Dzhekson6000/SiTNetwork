@@ -29,10 +29,18 @@ void Socket::initializeSSL()
     switch(_type_socket)
     {
         case SERVER:
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+            meth = TLS_server_method();
+#else
             meth = SSLv23_server_method();
+#endif
         break;
         case CLIENT:
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
             meth = TLS_client_method();
+#else
+            meth = SSLv23_client_method();
+#endif
         break;
     }
     

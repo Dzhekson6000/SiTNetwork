@@ -14,5 +14,4 @@ addons:
     packages:
     - gcc-4.8
     - g++-4.8
-    - openssl-1.0.1
 script: ./build.sh
