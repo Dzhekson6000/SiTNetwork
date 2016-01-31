@@ -3,6 +3,7 @@
 
 #include <string>
 #include "RuntimeError.h"
+#include <openssl/crypto.h>
 
 #ifdef WINDOWS
 #include <winsock2.h> 

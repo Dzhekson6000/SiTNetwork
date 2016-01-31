@@ -58,6 +58,11 @@ SET( HEADERS ${HEADERS} ${OPENSSL_INCLUDE_DIR})
 SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} ${OPENSSL_LIBRARIES})
 
 #--------------------------------------------------------------------
+# Set DL.
+#--------------------------------------------------------------------
+SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} -ldl)
+
+#--------------------------------------------------------------------
 # Compile
 #--------------------------------------------------------------------
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -o0 -g3 -std=c++11")
