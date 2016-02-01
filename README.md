@@ -10,5 +10,5 @@ SiTNetwork([![Build Status](https://travis-ci.org/Dzhekson6000/SiTNetwork.svg)](
 
 Use Lib
 -----------------------
-Use OpenSSL
-Use Threads
+  * Use OpenSSL
+  * Use Threads
