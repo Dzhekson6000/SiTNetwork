@@ -54,6 +54,8 @@ namespace SiTNetwork
         std::string _http;
         std::string _body;
         
+        size_t findNewLine(const std::string &request, const size_t &begin, size_t& delta);
+        
         virtual void parseZeroLine(const std::string &line);
         std::string parsePath(const std::string &url);
         void parseHeader(const std::string &line);

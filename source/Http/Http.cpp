@@ -2,6 +2,9 @@
 
 using namespace SiTNetwork;
 
+const char* strCRLF = "\r\n";
+const char* strLF = "\n";
+
 Http::Http():
 _method(METHOD::NONE)
 {
@@ -22,13 +25,12 @@ void Http::parse(const std::string &request)  throw(HttpParseError)
     _headers.clear();
     _vars.clear();
     
-    std::string findStr("\r\n");
     std::string tmp;
     
     size_t prev = 0;
-    size_t delta = findStr.length();
+    size_t delta;
     
-    size_t next = request.find(findStr);
+    size_t next = findNewLine(request, 0, delta);
     if (next == std::string::npos)
         throw HttpParseError("Not correct format HTTP");
     
@@ -36,7 +38,7 @@ void Http::parse(const std::string &request)  throw(HttpParseError)
     parseZeroLine(tmp);
     prev = next+delta;
 
-    while( (next=request.find(findStr,prev)) != std::string::npos)
+    while( (next=findNewLine(request, prev, delta)) != std::string::npos)
     {
         tmp = request.substr(prev, next-prev);
         prev = next+delta;
@@ -48,6 +50,19 @@ void Http::parse(const std::string &request)  throw(HttpParseError)
     }
     
     parseBody(request.substr(prev));
+}
+
+size_t Http::findNewLine(const std::string& request, const size_t& begin, size_t& delta)
+{
+    size_t next = request.find(strCRLF, begin);
+    if (next != std::string::npos)
+    {
+        delta = (unsigned)strlen(strCRLF);
+        return next;
+    }
+    next = request.find(strLF, begin);
+    delta = (unsigned)strlen(strLF);
+    return next;
 }
 
 void Http::parseZeroLine(const std::string &line)
