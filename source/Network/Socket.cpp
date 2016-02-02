@@ -19,6 +19,7 @@ Socket::Socket(const char *host, int port):_socket(0),_host(host),_port(port),_i
 
 Socket::~Socket()
 {
+    if(_isUseSSL)destroySSL();
 }
 
 void Socket::initializeSSL()
@@ -48,6 +49,8 @@ void Socket::initializeSSL()
     _ctx = SSL_CTX_new(meth);
     if (_ctx==NULL)
         throw RuntimeError("failed initialize OpenSSL");
+    
+    _isUseSSL = true;
 }
 
 void Socket::destroySSL()
@@ -55,6 +58,7 @@ void Socket::destroySSL()
     SSL_shutdown (_ssl);
     SSL_free (_ssl);
     SSL_CTX_free (_ctx);
+    _isUseSSL = false;
 }
 
 void Socket::create() throw(RuntimeError)
@@ -221,6 +225,19 @@ void Socket::setHost(const char* host)
 void Socket::setTypeProtocol(TYPE_PROTOCOL type_protocol)
 {
     _type_protocol = type_protocol;
+}
+
+void Socket::setUseSSL(bool isUseSSL)
+{
+    if(isUseSSL==_isUseSSL)return;
+    if(isUseSSL)
+    {
+        initializeSSL();
+    } 
+    else
+    {
+        destroySSL();
+    }
 }
 
 void Socket::setTypeSocket(TYPE_SOCKET type_socket)
