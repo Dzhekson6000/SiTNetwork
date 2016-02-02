@@ -31,14 +31,21 @@ void HttpSocketClient::read(HttpResponse& httpResponse)
     int result;
     std::ostringstream request;
     
-    result = Socket::read(buffer, 1024, 0);
-    if (result == SOCKET_ERROR)
+    while(true)
     {
-        close();
-        throw RuntimeError("read failed");
-    } else if (result > 0)
-    {
-        request << buffer;
+        result = Socket::read(buffer, 1024, 0);
+        if (result == SOCKET_ERROR)
+        {
+            close();
+            throw RuntimeError("read failed");
+        } else if (result > 0)
+        {
+            request << buffer;
+        } else if (result == 0)
+        {
+            break;
+        }
+        memset(buffer, 0, sizeof(buffer));
     }
     
     httpResponse.parse(request.str());
