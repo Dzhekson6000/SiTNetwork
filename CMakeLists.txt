@@ -47,13 +47,13 @@ SET( HEADERS ${PROJECT_ROOT}/include/ )
 #--------------------------------------------------------------------
 # Set Threads.
 #--------------------------------------------------------------------
-find_package (Threads)
+find_package (Threads REQUIRED)
 SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 #--------------------------------------------------------------------
 # Set OpenSSL.
 #--------------------------------------------------------------------
-find_package (OpenSSL)
+find_package (OpenSSL REQUIRED)
 SET( HEADERS ${HEADERS} ${OPENSSL_INCLUDE_DIR})
 SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} ${OPENSSL_LIBRARIES})
 
@@ -70,8 +70,8 @@ SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -o0 -g3 -std=c++11")
 INCLUDE_DIRECTORIES(${HEADERS})
 LINK_DIRECTORIES( ${LIB_INSTALL_PATH} )
 
-#ADD_LIBRARY( ${LIB} SHARED ${PROJECT_SOURCES} )
-ADD_EXECUTABLE( ${LIB} ${PROJECT_SOURCES} )
+ADD_LIBRARY( ${LIB} SHARED ${PROJECT_SOURCES})
+#ADD_EXECUTABLE( ${LIB} ${PROJECT_SOURCES} )
 
 TARGET_LINK_LIBRARIES( ${LIB} ${REQUIRED_LIBRARIES})
 
