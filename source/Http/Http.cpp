@@ -146,7 +146,7 @@ void Http::parseVar(const std::string& line)
     
     size_t next=line.find(findStr, prev);
     if (next == std::string::npos)
-        throw HttpParseError("Not Found Key: Not correct format HTTP");
+        return;
     
     key = line.substr(prev, next-prev);
     prev = next+delta;
@@ -187,6 +187,11 @@ void Http::addHeader(std::string key, std::string value)
     _headers.push_back(std::make_pair(key, value));
 }
 
+void Http::setHeader(std::vector<std::pair<std::string, std::string> >& headers)
+{
+    _headers = headers;
+}
+
 void Http::addVar(std::string key, std::string value)
 {
     for(auto &var : _vars) {
@@ -214,6 +219,11 @@ std::string Http::getProtocol() const
     return _protocol;
 }
 
+std::vector<std::pair<std::string, std::string>> Http::getHeaders() const
+{
+    return _headers;
+}
+
 
 std::string Http::getHeader(std::string key) const
 {
@@ -226,6 +236,24 @@ std::string Http::getHeader(std::string key) const
     }
     return "";
 }
+
+std::vector<std::pair<std::string, std::string> > Http::getVars() const
+{
+    return _vars;
+}
+
+std::string Http::getVar(std::string key) const
+{
+    for(auto &var : _vars)
+    {
+        if (var.first == key)
+        {
+            return var.second;
+        }
+    }
+    return "";
+}
+
 
 std::string Http::getBody() const
 {

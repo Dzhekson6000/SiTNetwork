@@ -27,13 +27,14 @@ HttpSocketClient::~HttpSocketClient()
 
 void HttpSocketClient::read(HttpResponse& httpResponse)
 {
-    char buffer[1024];
+    char buffer[1025];
     int result;
     std::ostringstream request;
     
     while(true)
     {
         result = Socket::read(buffer, 1024, 0);
+        buffer[1024]='\0';
         if (result == SOCKET_ERROR)
         {
             close();

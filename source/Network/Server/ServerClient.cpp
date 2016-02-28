@@ -11,6 +11,7 @@ _socketClient(socketClient)
 
 ServerClient::~ServerClient()
 {
+    _socketClient.close();
 }
 
 void* ServerClient::run(void* thisPtr)

@@ -27,11 +27,12 @@ HttpSocketServer::~HttpSocketServer()
 
 void HttpSocketServer::read(HttpRequest& httpRequest)
 {
-    char buffer[1024];
+    char buffer[1025];
     int result;
     std::ostringstream request;
     
     result = recv(getSocket(), buffer, 1024, 0);
+    buffer[1024]='\0';
     if (result == SOCKET_ERROR)
     {
         close();

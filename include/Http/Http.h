@@ -34,13 +34,17 @@ namespace SiTNetwork
         void setProtocol(const std::string &protocol);
         void setBody(const std::string &body);
         void addHeader(std::string key, std::string value);
+        void setHeader(std::vector<std::pair<std::string, std::string>>& headers);
         void addVar(std::string key, std::string value);
         
         METHOD getMethod();
         std::string getPath() const;
         std::string getProtocol() const;
         std::string getBody() const;
+        std::vector<std::pair<std::string, std::string>> getHeaders() const;
         std::string getHeader(std::string key) const;
+        std::vector<std::pair<std::string, std::string>> getVars() const;
+        std::string getVar(std::string key) const;
         std::string getMethodToString(METHOD method);
         METHOD getStringToMethod(const std::string &method);
         const std::string* getHttp() const;
