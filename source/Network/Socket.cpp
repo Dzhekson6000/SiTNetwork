@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include <netdb.h>
 
-
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/ssl.h>
@@ -283,3 +282,18 @@ ssize_t Socket::read(void* buffer, size_t n, int flags)
     }
 }
 
+bool Socket::sendFile(std::string path)
+{
+    FILE *file = fopen(path.c_str(),"r");
+    if (file == NULL)return false;
+    
+    unsigned char buffer[1024];
+    ssize_t bytes=0;
+    while ((bytes = fread(buffer, 1, sizeof(buffer), file)) > 0)
+    {
+        send(&buffer,bytes,0);
+    }
+    
+    fclose(file);
+    return true;    
+}

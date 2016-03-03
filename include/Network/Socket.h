@@ -20,7 +20,8 @@ typedef int SOCKET;
 namespace SiTNetwork
 {
 
-    class Socket {
+    class Socket
+    {
     public:
         enum TYPE_SOCKET
         {
@@ -55,6 +56,7 @@ namespace SiTNetwork
         
         ssize_t send(const void * buffer, size_t n, int flags);
         ssize_t read(void * buffer, size_t n, int flags);
+        bool    sendFile(std::string path);
     private:
         struct sockaddr_in _socketaddr;
         SOCKET _socket;
