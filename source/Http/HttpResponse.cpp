@@ -68,7 +68,7 @@ std::string* HttpResponse::gen()
     {
         _http.append(header.first).append(": ").append(header.second).append("\r\n");
     }
-    _http.append("\r\n\r\n");
+    _http.append("\r\n");
     _http.append(_body);
     
     return &_http;
