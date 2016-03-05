@@ -31,7 +31,7 @@ void HttpSocketServer::read(HttpRequest& httpRequest)
     int result;
     std::ostringstream request;
     
-    result = recv(getSocket(), buffer, 1024, 0);
+    result = Socket::read(buffer, 1024, 0);
     buffer[1024]='\0';
     if (result == SOCKET_ERROR)
     {
@@ -47,8 +47,7 @@ void HttpSocketServer::read(HttpRequest& httpRequest)
 
 void HttpSocketServer::send(const HttpResponse& httpResponse)
 {
-    if (::send(
-            getSocket(), 
+    if (Socket::send(
             httpResponse.getHttp()->c_str(),
             httpResponse.getHttp()->length(),
             0) == SOCKET_ERROR

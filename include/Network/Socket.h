@@ -48,6 +48,7 @@ namespace SiTNetwork
         void setSocket(SOCKET socket);
         
         void setUseSSL(bool isUseSSL);
+        bool getUseSSL() const;
         
         void setTypeSocket(TYPE_SOCKET type_socket);
         void setTypeProtocol(TYPE_PROTOCOL type_protocol);

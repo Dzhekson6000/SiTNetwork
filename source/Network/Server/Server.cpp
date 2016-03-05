@@ -27,15 +27,17 @@ void* Server::run(void* thisPtr)
 void Server::start()
 {
     Socket socket(_port);
+    socket.setUseSSL(_isUseSSL);
     socket.setTypeProtocol(Socket::TYPE_PROTOCOL::TCP);
     socket.setTypeSocket(Socket::TYPE_SOCKET::SERVER);
     socket.create();
     
-    Socket socketClient = Socket();
+    Socket* socketClient = nullptr;
     
     while(!_isClose)
     {
-        socketClient.accept(socket);
+        socketClient = new Socket();
+        socketClient->accept(socket);
         newClient(socketClient);
     }
 }
@@ -50,7 +52,7 @@ void Server::log(std::string message)
     if(_onLogFunc)_onLogFunc(message);
 }
 
-void Server::newClient(Socket socketClient)
+void Server::newClient(Socket* socketClient)
 {
     if(_onNewClientFunc)
         _onNewClientFunc(socketClient);
@@ -66,4 +68,14 @@ void Server::setNewClientFunc(OnNewClientFunc onNewClientFunc)
 void Server::setLogFunc(OnLogFunc onLogFunc)
 {
     _onLogFunc = onLogFunc;
+}
+
+void Server::setUseSSL(bool isUseSSL)
+{
+    _isUseSSL = isUseSSL;
+}
+
+bool Server::getUseSSL()
+{
+    return _isUseSSL;
 }

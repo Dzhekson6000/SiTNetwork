@@ -13,7 +13,7 @@ namespace SiTNetwork
 {
 
 typedef std::function<void(std::string)> OnLogFunc;
-typedef std::function<void(Socket clientSocket)> OnNewClientFunc;
+typedef std::function<void(Socket* clientSocket)> OnNewClientFunc;
 
     class Server {
     public:
@@ -25,13 +25,17 @@ typedef std::function<void(Socket clientSocket)> OnNewClientFunc;
         void setLogFunc(OnLogFunc onLogFunc);
 
         void setNewClientFunc(OnNewClientFunc onNewClientFunc);
-
+        void setUseSSL(bool isUseSSL);
+        bool getUseSSL();
+        
+        
         static void* run(void* thisPtr);
-    private:    
+    private:
+        bool _isUseSSL;
         int _port;
         bool _isClose;
         void log(std::string message);
-        void newClient(Socket socketClient); 
+        void newClient(Socket* socketClient); 
 
         OnLogFunc _onLogFunc;
         OnNewClientFunc _onNewClientFunc;

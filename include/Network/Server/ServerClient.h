@@ -6,12 +6,12 @@ namespace SiTNetwork
 {
     class ServerClient {
     public:    
-        ServerClient(Socket socketClient);
+        ServerClient(Socket* socketClient);
         virtual ~ServerClient();
 
         static void* run(void* thisPtr);
     protected:
-        Socket _socketClient;
+        Socket* _socketClient;
 
         virtual void thread();
     };

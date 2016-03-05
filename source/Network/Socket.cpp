@@ -25,7 +25,7 @@ void Socket::initializeSSL()
 {
     const SSL_METHOD* meth;
     
-    SSLeay_add_ssl_algorithms();
+    SSL_library_init();
     switch(_type_socket)
     {
         case SERVER:
@@ -124,6 +124,24 @@ void Socket::create() throw(RuntimeError)
 #endif
                     throw RuntimeError("listen. Error");
                 }
+                
+                if(_isUseSSL)
+                {
+                    if (SSL_CTX_use_certificate_file(_ctx, CERTF, SSL_FILETYPE_PEM) <= 0)
+                    {
+                        ERR_print_errors_fp(stderr);
+                    }
+                    
+                    if (SSL_CTX_use_PrivateKey_file(_ctx, KEYF, SSL_FILETYPE_PEM) <= 0)
+                    {
+                        ERR_print_errors_fp(stderr);
+                    }
+
+                    if (!SSL_CTX_check_private_key(_ctx))
+                    {
+                        fprintf(stderr,"Private key does not match the certificate public key\n");
+                    }
+                }
             }
         }
         break;
@@ -172,6 +190,18 @@ Socket* Socket::accept(const Socket& socket)
     if(_socket < 0)
     {
         throw RuntimeError("Accept error");
+    }
+    
+    if(socket.getUseSSL())
+    {
+        setTypeProtocol(Socket::TYPE_PROTOCOL::TCP);
+        setTypeSocket(Socket::TYPE_SOCKET::CLIENT);
+        setUseSSL(true);
+        _ssl = SSL_new (_ctx);
+        if (_ssl==NULL)
+            throw RuntimeError("SSL connect failed");
+        SSL_set_fd (_ssl, _socket);
+        SSL_accept(_ssl);
     }
 }
 
@@ -238,6 +268,12 @@ void Socket::setUseSSL(bool isUseSSL)
         destroySSL();
     }
 }
+
+bool Socket::getUseSSL() const
+{
+    return _isUseSSL;
+}
+
 
 void Socket::setTypeSocket(TYPE_SOCKET type_socket)
 {

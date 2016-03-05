@@ -3,7 +3,7 @@
 
 using namespace SiTNetwork;
 
-ServerClient::ServerClient(Socket socketClient):
+ServerClient::ServerClient(Socket* socketClient):
 _socketClient(socketClient)
 {
     std::thread(&ServerClient::run, this).detach();
@@ -11,7 +11,8 @@ _socketClient(socketClient)
 
 ServerClient::~ServerClient()
 {
-    _socketClient.close();
+    _socketClient->close();
+    delete _socketClient;
 }
 
 void* ServerClient::run(void* thisPtr)
