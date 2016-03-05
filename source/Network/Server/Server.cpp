@@ -37,8 +37,10 @@ void Server::start()
     while(!_isClose)
     {
         socketClient = new Socket();
-        socketClient->accept(socket);
-        newClient(socketClient);
+        if(socketClient->accept(socket))
+            newClient(socketClient);
+        else
+            delete socketClient;
     }
 }
 

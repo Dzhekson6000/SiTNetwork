@@ -12,7 +12,7 @@ namespace SiTNetwork
         
         std::string* gen();
     protected:
-        void parseZeroLine(const std::string &line);
+        bool parseZeroLine(const std::string &line);
         void parseBody(const std::string &line);
     };
 }

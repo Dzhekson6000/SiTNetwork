@@ -74,7 +74,7 @@ std::string* HttpResponse::gen()
     return &_http;
 }
 
-void HttpResponse::parseZeroLine(const std::string &line)
+bool HttpResponse::parseZeroLine(const std::string &line)
 {
     std::string findStr(" ");
     std::string tmp;
@@ -85,7 +85,7 @@ void HttpResponse::parseZeroLine(const std::string &line)
     //parse protocol
     size_t next=line.find(findStr, prev);
     if (next == std::string::npos)
-        throw HttpParseError("Not Found string METHOD: Not correct format HTTP");
+        return false;
     tmp = line.substr(prev, next-prev);
     prev = next+delta;
     
@@ -94,6 +94,7 @@ void HttpResponse::parseZeroLine(const std::string &line)
     //parse status
     tmp = line.substr(prev);
     setStatus(std::stoi(tmp,nullptr));
+    return true;
 }
 
 void HttpResponse::parseBody(const std::string &line)

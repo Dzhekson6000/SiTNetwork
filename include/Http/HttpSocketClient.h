@@ -14,8 +14,8 @@ namespace SiTNetwork
         HttpSocketClient(const char *host, int port);
         virtual ~HttpSocketClient();
         
-        void read(HttpResponse& httpResponse);
-        void send(const HttpRequest& httpRequest);
+        bool read(HttpResponse& httpResponse);
+        bool send(const HttpRequest& httpRequest);
     private:
     };
 }

@@ -2,7 +2,6 @@
 #define SOCKET_H
 
 #include <string>
-#include "RuntimeError.h"
 #include <openssl/crypto.h>
 
 #ifdef WINDOWS
@@ -40,9 +39,9 @@ namespace SiTNetwork
         Socket(const char *host, int port);
         virtual ~Socket();
         
-        void create() throw(RuntimeError);
+        bool create();
         void close();
-        Socket* accept(const Socket& socket);
+        bool accept(const Socket& socket);
         SOCKET getSocket() const;
         
         void setSocket(SOCKET socket);
@@ -71,7 +70,7 @@ namespace SiTNetwork
         void createAddres();
         unsigned long getHostAddress(const char* host);
         
-        void initializeSSL();
+        bool initializeSSL();
         void destroySSL();
         SSL_CTX* _ctx;
         SSL*     _ssl;

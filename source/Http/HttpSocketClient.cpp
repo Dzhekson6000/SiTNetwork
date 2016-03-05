@@ -1,5 +1,6 @@
 #include "Http/HttpSocketClient.h"
 #include <sstream>
+#include <string.h>
 
 using namespace SiTNetwork;
 
@@ -25,7 +26,7 @@ HttpSocketClient::~HttpSocketClient()
 {
 }
 
-void HttpSocketClient::read(HttpResponse& httpResponse)
+bool HttpSocketClient::read(HttpResponse& httpResponse)
 {
     char buffer[1025];
     int result;
@@ -38,7 +39,7 @@ void HttpSocketClient::read(HttpResponse& httpResponse)
         if (result == SOCKET_ERROR)
         {
             close();
-            throw RuntimeError("read failed");
+            return false;
         } else if (result > 0)
         {
             request << buffer;
@@ -49,10 +50,10 @@ void HttpSocketClient::read(HttpResponse& httpResponse)
         memset(buffer, 0, sizeof(buffer));
     }
     
-    httpResponse.parse(request.str());
+    return httpResponse.parse(request.str());
 }
 
-void HttpSocketClient::send(const HttpRequest& httpRequest)
+bool HttpSocketClient::send(const HttpRequest& httpRequest)
 {
     if (Socket::send( 
             httpRequest.getHttp()->c_str(),
@@ -60,7 +61,8 @@ void HttpSocketClient::send(const HttpRequest& httpRequest)
             0) == SOCKET_ERROR
         )
     {
-        throw RuntimeError("send failed");
+        return false;
     }
+    return true;
 }
 

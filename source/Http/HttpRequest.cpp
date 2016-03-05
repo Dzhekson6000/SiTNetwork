@@ -21,7 +21,7 @@ std::string* HttpRequest::gen()
     {
         _http.append(header.first).append(": ").append(header.second).append("\r\n");
     }
-    _http.append("\r\n\r\n");
+    _http.append("\r\n");
 
     int isBegin = true;
     for(auto var: _vars)
@@ -34,7 +34,7 @@ std::string* HttpRequest::gen()
     return &_http;
 }
 
-void HttpRequest::parseZeroLine(const std::string &line)
+bool HttpRequest::parseZeroLine(const std::string &line)
 {
     std::string findStr(" ");
     std::string tmp;
@@ -45,19 +45,19 @@ void HttpRequest::parseZeroLine(const std::string &line)
     //parse METHOD
     size_t next=line.find(findStr, prev);
     if (next == std::string::npos)
-        throw HttpParseError("Not Found string METHOD: Not correct format HTTP");
+        return false;
     tmp = line.substr(prev, next-prev);
     prev = next+delta;
     
     METHOD method = getStringToMethod(tmp);
     if(method == METHOD::NONE)
-        throw HttpParseError("Not Found METHOD: Not correct format HTTP");
+        return false;
     setMethod(method);
     
     //parse URL
     next=line.find(findStr, prev);
     if (next == std::string::npos)
-        throw HttpParseError("Not Found string METHOD: Not correct format HTTP");
+        return false;
     tmp = line.substr(prev, next-prev);
     prev = next+delta;
     

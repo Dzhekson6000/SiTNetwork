@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include "HttpParseError.h"
 
 namespace SiTNetwork
 {
@@ -27,7 +26,7 @@ namespace SiTNetwork
         virtual ~Http();
 
         virtual std::string* gen();
-        void parse(const std::string &request) throw(HttpParseError);
+        bool parse(const std::string &request);
         
         void setMethod(METHOD method);
         void setPath(const std::string &path);
@@ -60,9 +59,9 @@ namespace SiTNetwork
         
         size_t findNewLine(const std::string &request, const size_t &begin, size_t& delta);
         
-        virtual void parseZeroLine(const std::string &line);
+        virtual bool parseZeroLine(const std::string &line);
         std::string parsePath(const std::string &url);
-        void parseHeader(const std::string &line);
+        bool parseHeader(const std::string &line);
         virtual void parseBody(const std::string &line);
         void parseVars(const std::string &line);
         void parseVar(const std::string &line);

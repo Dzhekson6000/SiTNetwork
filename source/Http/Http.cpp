@@ -1,4 +1,5 @@
 #include "Http/Http.h"
+#include <cstring>
 
 using namespace SiTNetwork;
 
@@ -19,7 +20,7 @@ std::string* Http::gen()
     return &_http;
 }
 
-void Http::parse(const std::string &request)  throw(HttpParseError)
+bool Http::parse(const std::string &request)
 {
     _http.clear();
     _headers.clear();
@@ -32,10 +33,10 @@ void Http::parse(const std::string &request)  throw(HttpParseError)
     
     size_t next = findNewLine(request, 0, delta);
     if (next == std::string::npos)
-        throw HttpParseError("Not correct format HTTP");
+        return false;
     
     tmp = request.substr(0, next);
-    parseZeroLine(tmp);
+    if(!parseZeroLine(tmp))return false;
     prev = next+delta;
 
     while( (next=findNewLine(request, prev, delta)) != std::string::npos)
@@ -46,10 +47,11 @@ void Http::parse(const std::string &request)  throw(HttpParseError)
         {
             break;
         }
-        parseHeader(tmp);
+        if(!parseHeader(tmp))return false;
     }
     
     parseBody(request.substr(prev));
+    return true;
 }
 
 size_t Http::findNewLine(const std::string& request, const size_t& begin, size_t& delta)
@@ -65,8 +67,9 @@ size_t Http::findNewLine(const std::string& request, const size_t& begin, size_t
     return next;
 }
 
-void Http::parseZeroLine(const std::string &line)
+bool Http::parseZeroLine(const std::string &line)
 {
+    return true;
 }
 
 std::string Http::parsePath(const std::string &url)
@@ -90,7 +93,7 @@ std::string Http::parsePath(const std::string &url)
 }
 
 
-void Http::parseHeader(const std::string &line)
+bool Http::parseHeader(const std::string &line)
 {
     std::string findStr(": ");
     std::string key;
@@ -101,12 +104,13 @@ void Http::parseHeader(const std::string &line)
     
     size_t next=line.find(findStr, prev);
     if (next == std::string::npos)
-        throw HttpParseError("Not Found Header: Not correct format HTTP");
+        return false;
     
     key = line.substr(prev, next-prev);
     prev = next+delta;
     value = line.substr(prev);
     addHeader(key, value);
+    return true;
 }
 
 void Http::parseBody(const std::string &line)

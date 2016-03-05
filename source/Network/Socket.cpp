@@ -21,7 +21,7 @@ Socket::~Socket()
     if(_isUseSSL)destroySSL();
 }
 
-void Socket::initializeSSL()
+bool Socket::initializeSSL()
 {
     const SSL_METHOD* meth;
     
@@ -47,9 +47,10 @@ void Socket::initializeSSL()
     SSL_load_error_strings();
     _ctx = SSL_CTX_new(meth);
     if (_ctx==NULL)
-        throw RuntimeError("failed initialize OpenSSL");
+        return false;
     
     _isUseSSL = true;
+    return true;
 }
 
 void Socket::destroySSL()
@@ -60,7 +61,7 @@ void Socket::destroySSL()
     _isUseSSL = false;
 }
 
-void Socket::create() throw(RuntimeError)
+bool Socket::create()
 {
 #ifdef _WIN32
     WSADATA         WsaData;  
@@ -88,7 +89,7 @@ void Socket::create() throw(RuntimeError)
 #else
     if (_socket == SOCKET_ERROR)
     {
-        throw RuntimeError("Could not create socket");
+        return false;
     }
 #endif  
     
@@ -102,7 +103,7 @@ void Socket::create() throw(RuntimeError)
             const int on = 1;
             if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on) == -1)
             {
-                throw RuntimeError("setsockopt(SO_REUSEADDR) failed");
+                return false;
             }
 
             if( bind(_socket,(struct sockaddr*)&_socketaddr , sizeof(_socketaddr)) < 0)
@@ -111,7 +112,7 @@ void Socket::create() throw(RuntimeError)
 #ifdef _WIN32
                 WSACleanup();
 #endif
-                throw RuntimeError("bind failed. Error");
+                return false;
             }
 
             if(_type_protocol == TCP)
@@ -122,25 +123,12 @@ void Socket::create() throw(RuntimeError)
 #ifdef _WIN32
                     WSACleanup();
 #endif
-                    throw RuntimeError("listen. Error");
+                    return false;
                 }
                 
                 if(_isUseSSL)
                 {
-                    if (SSL_CTX_use_certificate_file(_ctx, CERTF, SSL_FILETYPE_PEM) <= 0)
-                    {
-                        ERR_print_errors_fp(stderr);
-                    }
                     
-                    if (SSL_CTX_use_PrivateKey_file(_ctx, KEYF, SSL_FILETYPE_PEM) <= 0)
-                    {
-                        ERR_print_errors_fp(stderr);
-                    }
-
-                    if (!SSL_CTX_check_private_key(_ctx))
-                    {
-                        fprintf(stderr,"Private key does not match the certificate public key\n");
-                    }
                 }
             }
         }
@@ -152,17 +140,17 @@ void Socket::create() throw(RuntimeError)
                 if(connect(_socket,(sockaddr*)&_socketaddr, sizeof(_socketaddr)))  
                 {
                     close();
-                    throw RuntimeError("connect failed");
+                    return false;
                 }
                 if(_isUseSSL)
                 {
                     _ssl = SSL_new (_ctx);
                     if (_ssl==NULL)
-                        throw RuntimeError("SSL connect failed");
+                        return false;
                     SSL_set_fd (_ssl, _socket);
                     if(SSL_connect (_ssl) == SOCKET_ERROR)
                     {
-                        throw RuntimeError("SSL connect failed");
+                        return false;
                     }
                     
                     //next get clients certificate
@@ -171,6 +159,7 @@ void Socket::create() throw(RuntimeError)
         }
         break;
     }
+    return true;
 }
 
 void Socket::close()
@@ -182,14 +171,14 @@ void Socket::close()
 #endif
 }
 
-Socket* Socket::accept(const Socket& socket)
+bool Socket::accept(const Socket& socket)
 {
     socklen_t len;
     len = sizeof(_socketaddr);
     _socket = ::accept(socket.getSocket(), (struct sockaddr*)&_socketaddr, &len);
     if(_socket < 0)
     {
-        throw RuntimeError("Accept error");
+        return false;
     }
     
     if(socket.getUseSSL())
@@ -199,10 +188,11 @@ Socket* Socket::accept(const Socket& socket)
         setUseSSL(true);
         _ssl = SSL_new (_ctx);
         if (_ssl==NULL)
-            throw RuntimeError("SSL connect failed");
+            return false;
         SSL_set_fd (_ssl, _socket);
         SSL_accept(_ssl);
     }
+    return true;
 }
 
 void Socket::createAddres()
@@ -230,7 +220,7 @@ unsigned long Socket::getHostAddress(const char* host)
 	phe = gethostbyname(host);  
 	if(phe==NULL) 
 	{
-            throw RuntimeError("failed in gethostbyname");
+            return 0;
 	}
 	p = *phe->h_addr_list;  
 	return *((unsigned long*)p);  
@@ -292,10 +282,6 @@ ssize_t Socket::send(const void* buffer, size_t n, int flags)
         ret = ::send(getSocket(), buffer, n, flags);
     }
     
-    if (ret == SOCKET_ERROR)
-    {
-        throw RuntimeError("send failed");
-    }
     return ret;
 }
 
@@ -311,11 +297,7 @@ ssize_t Socket::read(void* buffer, size_t n, int flags)
         ret = recv(getSocket(), buffer, n, flags);
     }
     
-    if (ret == SOCKET_ERROR)
-    {
-        close();
-        throw RuntimeError("read failed");
-    }
+    return ret;
 }
 
 bool Socket::sendFile(std::string path)
@@ -327,7 +309,8 @@ bool Socket::sendFile(std::string path)
     ssize_t bytes=0;
     while ((bytes = fread(buffer, 1, sizeof(buffer), file)) > 0)
     {
-        send(&buffer,bytes,0);
+        if(send(&buffer,bytes,0)==SOCKET_ERROR)
+            return false;
     }
     
     fclose(file);

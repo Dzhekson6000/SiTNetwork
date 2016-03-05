@@ -25,7 +25,7 @@ HttpSocketServer::~HttpSocketServer()
 {
 }
 
-void HttpSocketServer::read(HttpRequest& httpRequest)
+bool HttpSocketServer::read(HttpRequest& httpRequest)
 {
     char buffer[1025];
     int result;
@@ -36,16 +36,16 @@ void HttpSocketServer::read(HttpRequest& httpRequest)
     if (result == SOCKET_ERROR)
     {
         close();
-        throw RuntimeError("read failed");
+        return false;
     } else if (result > 0)
     {
         request << buffer;
     }
     
-    httpRequest.parse(request.str());
+    return httpRequest.parse(request.str());
 }
 
-void HttpSocketServer::send(const HttpResponse& httpResponse)
+bool HttpSocketServer::send(const HttpResponse& httpResponse)
 {
     if (Socket::send(
             httpResponse.getHttp()->c_str(),
@@ -53,6 +53,7 @@ void HttpSocketServer::send(const HttpResponse& httpResponse)
             0) == SOCKET_ERROR
         )
     {
-        throw RuntimeError("send failed");
+        return false;
     }
+    return true;
 }
