@@ -67,6 +67,7 @@ bool HttpRequest::parseZeroLine(const std::string &line)
     //parse protocol
     tmp = line.substr(prev);
     setProtocol(tmp);
+    return true;
 }
 
 void HttpRequest::parseBody(const std::string &line)

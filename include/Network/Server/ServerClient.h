@@ -8,8 +8,6 @@ namespace SiTNetwork
     public:    
         ServerClient(Socket* socketClient);
         virtual ~ServerClient();
-
-        static void* run(void* thisPtr);
     protected:
         Socket* _socketClient;
 

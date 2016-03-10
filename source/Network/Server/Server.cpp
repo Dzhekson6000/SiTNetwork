@@ -1,17 +1,20 @@
 #include "Network/Server/Server.h"
+#include <thread>
 
 using namespace SiTNetwork;
 
 Server::Server():
 _port(0),
 _onLogFunc(nullptr),
-_isClose(false)
+_isClose(false),
+_isUseSSL(false)
 {}
 
 Server::Server(int port):
 _port(port),
 _onLogFunc(nullptr),
-_isClose(false)
+_isClose(false),
+_isUseSSL(false)
 {}
 
 Server::~Server()
@@ -58,8 +61,6 @@ void Server::newClient(Socket* socketClient)
 {
     if(_onNewClientFunc)
         _onNewClientFunc(socketClient);
-    else
-        new ServerClient(socketClient);
 }
 
 void Server::setNewClientFunc(OnNewClientFunc onNewClientFunc)
