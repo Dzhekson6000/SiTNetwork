@@ -34,8 +34,8 @@ bool HttpSocketClient::read(HttpResponse& httpResponse)
     
     while(true)
     {
-        result = Socket::read(buffer, 1024, 0);
-        buffer[1024]='\0';
+        result = Socket::read(&buffer, 1024, 0);
+        buffer[result]='\0';
         if (result == SOCKET_ERROR)
         {
             close();
@@ -49,7 +49,6 @@ bool HttpSocketClient::read(HttpResponse& httpResponse)
         }
         memset(buffer, 0, sizeof(buffer));
     }
-    
     return httpResponse.parse(request.str());
 }
 

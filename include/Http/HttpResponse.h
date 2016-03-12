@@ -20,7 +20,7 @@ namespace SiTNetwork
         unsigned int _status;
         static std::map<int, const char *> _statuses;
         
-        bool parseZeroLine(const std::string &line);
+        bool parseStartingLine(const std::string &line);
         void parseBody(const std::string &line);
     };
 }

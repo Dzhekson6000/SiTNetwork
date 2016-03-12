@@ -60,7 +60,7 @@ std::string* HttpResponse::gen()
     snprintf(statusStr, 6,"%d",_status);
     
     _http.clear();
-    _http.append(_protocol);
+    //_http.append(_protocol);
     _http.append(" ").append(statusStr);
     _http.append(" ").append(getStatus(_status)).append("\r\n");
     
@@ -74,7 +74,7 @@ std::string* HttpResponse::gen()
     return &_http;
 }
 
-bool HttpResponse::parseZeroLine(const std::string &line)
+bool HttpResponse::parseStartingLine(const std::string &line)
 {
     std::string findStr(" ");
     std::string tmp;
@@ -89,7 +89,7 @@ bool HttpResponse::parseZeroLine(const std::string &line)
     tmp = line.substr(prev, next-prev);
     prev = next+delta;
     
-    setProtocol(tmp);
+    setProtocol(getProtocolFromString(tmp));
     
     //parse status
     tmp = line.substr(prev);

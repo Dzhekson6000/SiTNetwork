@@ -6,8 +6,11 @@ using namespace SiTNetwork;
 const char* strCRLF = "\r\n";
 const char* strLF = "\n";
 
+const char* Http::PROTOCOL_STRING[] = {"HTTP/0.9","HTTP/1.0","HTTP/1.1","HTTP/2"};
+const char* Http::METHOD_STRING[] = {"OPTIONS","GET","HEAD","POST","PUT","DELETE","TRACE","CONNECT"};
+
 Http::Http():
-_method(METHOD::NONE)
+_method(METHOD::GET)
 {
 }
 
@@ -36,7 +39,7 @@ bool Http::parse(const std::string &request)
         return false;
     
     tmp = request.substr(0, next);
-    if(!parseZeroLine(tmp))return false;
+    if(!parseStartingLine(tmp))return false;
     prev = next+delta;
 
     while( (next=findNewLine(request, prev, delta)) != std::string::npos)
@@ -67,7 +70,7 @@ size_t Http::findNewLine(const std::string& request, const size_t& begin, size_t
     return next;
 }
 
-bool Http::parseZeroLine(const std::string &line)
+bool Http::parseStartingLine(const std::string &line)
 {
     return true;
 }
@@ -169,7 +172,7 @@ void Http::setPath(const std::string &path)
     _path = path;
 }
 
-void Http::setProtocol(const std::string &protocol)
+void Http::setProtocol(PROTOCOL protocol)
 {
     _protocol = protocol;
 }
@@ -178,7 +181,6 @@ void Http::setBody(const std::string &body)
 {
     _body = body;
 }
-
 
 void Http::addHeader(std::string key, std::string value)
 {
@@ -191,7 +193,7 @@ void Http::addHeader(std::string key, std::string value)
     _headers.push_back(std::make_pair(key, value));
 }
 
-void Http::setHeader(std::vector<std::pair<std::string, std::string> >& headers)
+void Http::setHeaders(std::vector<std::pair<std::string, std::string> >& headers)
 {
     _headers = headers;
 }
@@ -207,6 +209,15 @@ void Http::addVar(std::string key, std::string value)
     _vars.push_back(std::make_pair(key, value));
 }
 
+const std::string* Http::getHttp() const
+{
+    return &_http;
+}
+
+const std::string* Http::getBody() const
+{
+    return &_body;
+}
 
 Http::METHOD Http::getMethod()
 {
@@ -218,16 +229,10 @@ std::string Http::getPath() const
     return _path;
 }
 
-std::string Http::getProtocol() const
+Http::PROTOCOL Http::getProtocol() const
 {
     return _protocol;
 }
-
-std::vector<std::pair<std::string, std::string>> Http::getHeaders() const
-{
-    return _headers;
-}
-
 
 std::string Http::getHeader(std::string key) const
 {
@@ -239,11 +244,6 @@ std::string Http::getHeader(std::string key) const
         }
     }
     return "";
-}
-
-std::vector<std::pair<std::string, std::string> > Http::getVars() const
-{
-    return _vars;
 }
 
 std::string Http::getVar(std::string key) const
@@ -258,42 +258,44 @@ std::string Http::getVar(std::string key) const
     return "";
 }
 
-
-std::string Http::getBody() const
+std::vector<std::pair<std::string, std::string>> Http::getHeaders() const
 {
-    return _body;
+    return _headers;
 }
 
-
-std::string Http::getMethodToString(METHOD method) {
-    switch(method)
-    {
-        case METHOD::GET:
-            return std::string("GET");
-        case METHOD::POST:
-            return std::string("POST");
-        case METHOD::NONE:
-            return std::string("");
-    }
+std::vector<std::pair<std::string, std::string> > Http::getVars() const
+{
+    return _vars;
 }
 
-Http::METHOD Http::getStringToMethod(const std::string &method)
+std::string Http::getMethodAtString(METHOD method)
 {
-    if(method == "GET")
-    {
-        return METHOD::GET;
-    }
-    else if(method == "POST")
-    {
-        return METHOD::POST;
-    }
-    else
-    {
-        return METHOD::NONE;
-    }
+    return METHOD_STRING[static_cast<unsigned>(method)];
 }
 
-const std::string* Http::getHttp() const
+Http::METHOD Http::getMethodFromString(const std::string &method)
 {
-    return &_http;
+    int i = 0;
+    for(auto methodString: METHOD_STRING)
+    {
+	if(methodString==method)break;
+	i++;
+    }
+    return static_cast<METHOD>(i);
+}
+
+std::string Http::getProtocolAtString(PROTOCOL protocol)
+{
+    return PROTOCOL_STRING[static_cast<unsigned>(protocol)];
+}
+
+Http::PROTOCOL Http::getProtocolFromString(const std::string& protocol)
+{
+    int i = 0;
+    for(auto protocolString: PROTOCOL_STRING)
+    {
+	if(protocolString==protocol)break;
+	i++;
+    }
+    return static_cast<PROTOCOL>(i);
 }

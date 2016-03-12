@@ -152,7 +152,7 @@ bool Socket::create()
                     {
                         return false;
                     }
-                    
+
                     //next get clients certificate
                 }
             }   
