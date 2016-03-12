@@ -94,12 +94,13 @@ bool HttpResponse::parseStartingLine(const std::string &line)
     //parse status
     tmp = line.substr(prev);
     setStatus(std::stoi(tmp,nullptr));
-    return true;
+    return Http::parseStartingLine(line);
 }
 
-void HttpResponse::parseBody(const std::string &line)
+bool HttpResponse::parseBody(const std::string &line)
 {
     setBody(line);
+    return Http::parseBody(line);
 }
 
 void HttpResponse::setStatus(unsigned int status)

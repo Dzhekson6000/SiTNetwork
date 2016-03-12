@@ -72,7 +72,8 @@ bool HttpRequest::parseStartingLine(const std::string &line)
     return true;
 }
 
-void HttpRequest::parseBody(const std::string &line)
+bool HttpRequest::parseBody(const std::string &line)
 {
     parseVars(line);
+    return true;
 }

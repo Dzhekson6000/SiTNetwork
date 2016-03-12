@@ -31,15 +31,31 @@ namespace SiTNetwork
             COUNT=8
         };
         
+	enum class PARSE_STATUS
+	{
+	    PARSE_STARTLINE,
+	    PARSE_HEAD,
+	    PARSE_BODY,
+	    PARSE_END
+	};
+	
 	static const char* PROTOCOL_STRING[];
 	static const char* METHOD_STRING[];
 	
         Http();
         virtual ~Http();
 
+	void clear();
+	
         virtual std::string* gen();
+	bool parse();
         bool parse(const std::string &request);
-        
+	void parseNewDate(const std::string &date);
+	
+	virtual bool parseStartingLine(const std::string &line);
+	bool parseHead(const std::string &head);
+        virtual bool parseBody(const std::string& body);
+	
         void setMethod(METHOD method);
         void setPath(const std::string &path);
         void setProtocol(PROTOCOL protocol);
@@ -78,12 +94,14 @@ namespace SiTNetwork
         std::string _http;
         std::string _body;
 	
+	unsigned int _parsePosition;
+	unsigned int _leftLoadDate;
+	PARSE_STATUS _parseStatus;
+	
         size_t findNewLine(const std::string &request, const size_t &begin, size_t& delta);
         
-        virtual bool parseStartingLine(const std::string &line);
         std::string parsePath(const std::string &url);
         bool parseHeader(const std::string &line);
-        virtual void parseBody(const std::string &line);
         void parseVars(const std::string &line);
         void parseVar(const std::string &line);
     };

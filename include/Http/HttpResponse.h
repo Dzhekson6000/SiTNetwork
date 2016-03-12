@@ -11,6 +11,7 @@ namespace SiTNetwork
         virtual ~HttpResponse();
 
         std::string* gen();
+	bool parseBody(const std::string &line);
         
         void setStatus(unsigned int status);
         
@@ -21,7 +22,6 @@ namespace SiTNetwork
         static std::map<int, const char *> _statuses;
         
         bool parseStartingLine(const std::string &line);
-        void parseBody(const std::string &line);
     };
 }
 

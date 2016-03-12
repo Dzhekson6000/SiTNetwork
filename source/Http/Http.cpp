@@ -4,13 +4,17 @@
 using namespace SiTNetwork;
 
 const char* strCRLF = "\r\n";
+const char* strTwoCRLF = "\r\n\r\n";
 const char* strLF = "\n";
 
 const char* Http::PROTOCOL_STRING[] = {"HTTP/0.9","HTTP/1.0","HTTP/1.1","HTTP/2"};
 const char* Http::METHOD_STRING[] = {"OPTIONS","GET","HEAD","POST","PUT","DELETE","TRACE","CONNECT"};
 
 Http::Http():
-_method(METHOD::GET)
+_method(METHOD::GET),
+_leftLoadDate(0),
+_parsePosition(0),
+_parseStatus(PARSE_STATUS::PARSE_STARTLINE)
 {
 }
 
@@ -18,42 +22,90 @@ Http::~Http()
 {
 }
 
+void Http::clear()
+{
+    _parsePosition = 0;
+    _leftLoadDate = 0;
+    _parseStatus = PARSE_STATUS::PARSE_STARTLINE;
+    _http.clear();
+    _headers.clear();
+    _vars.clear();
+}
+
+
 std::string* Http::gen()
 {
     return &_http;
 }
 
+bool Http::parse()
+{
+    size_t next, delta;
+    
+    while(_parseStatus != PARSE_STATUS::PARSE_END)
+    {
+	switch(_parseStatus)
+	{
+	    case PARSE_STATUS::PARSE_STARTLINE:
+		next = findNewLine(_http, 0, delta);
+		if (next == std::string::npos)return true;
+		if(!parseStartingLine(_http.substr(0, next)))return false;
+		_parsePosition = next+delta;
+		break;
+	    case PARSE_STATUS::PARSE_HEAD:
+		next = _http.find(strTwoCRLF, _parsePosition);
+		if (next == std::string::npos)return true;
+		if(!parseHead(_http.substr(_parsePosition, next)))return false;
+		_parsePosition = next+(unsigned)strlen(strTwoCRLF);
+		break;
+	    case PARSE_STATUS::PARSE_BODY:
+		if(_leftLoadDate!=0)return true;
+		if(!parseBody(_http.substr(_parsePosition)) )return false;
+		_parsePosition = _http.size();
+		break;
+	}
+    }
+    return true;
+}
+
 bool Http::parse(const std::string &request)
 {
-    _http.clear();
-    _headers.clear();
-    _vars.clear();
-    
-    std::string tmp;
-    
-    size_t prev = 0;
-    size_t delta;
-    
-    size_t next = findNewLine(request, 0, delta);
-    if (next == std::string::npos)
-        return false;
-    
-    tmp = request.substr(0, next);
-    if(!parseStartingLine(tmp))return false;
-    prev = next+delta;
+    clear();
+    _http = request;
+    return parse();
+}
 
-    while( (next=findNewLine(request, prev, delta)) != std::string::npos)
+void Http::parseNewDate(const std::string& date)
+{
+    _http.append(date);
+    parse();
+}
+
+bool Http::parseStartingLine(const std::string &line)
+{
+    _parseStatus = PARSE_STATUS::PARSE_HEAD;
+    return true;
+}
+
+bool Http::parseHead(const std::string& head)
+{
+    size_t delta, next, prev = 0;
+    while( (next=findNewLine(head, prev, delta)) != std::string::npos && prev != next)
     {
-        tmp = request.substr(prev, next-prev);
-        prev = next+delta;
-        if(tmp == "")
-        {
-            break;
-        }
-        if(!parseHeader(tmp))return false;
+        if(!parseHeader(head.substr(prev, next-prev)))return false;
+	prev = next+delta;
     }
     
-    parseBody(request.substr(prev));
+    std::string contentLength = getHeader("Content-Length");
+    if(!contentLength.empty()) _leftLoadDate = atoi(contentLength.c_str());
+    
+    _parseStatus = PARSE_STATUS::PARSE_BODY;
+    return true;
+}
+
+bool Http::parseBody(const std::string& body)
+{
+    _parseStatus = PARSE_STATUS::PARSE_END;
     return true;
 }
 
@@ -68,11 +120,6 @@ size_t Http::findNewLine(const std::string& request, const size_t& begin, size_t
     next = request.find(strLF, begin);
     delta = (unsigned)strlen(strLF);
     return next;
-}
-
-bool Http::parseStartingLine(const std::string &line)
-{
-    return true;
 }
 
 std::string Http::parsePath(const std::string &url)
@@ -114,10 +161,6 @@ bool Http::parseHeader(const std::string &line)
     value = line.substr(prev);
     addHeader(key, value);
     return true;
-}
-
-void Http::parseBody(const std::string &line)
-{
 }
 
 void Http::parseVars(const std::string& line)

@@ -11,9 +11,9 @@ namespace SiTNetwork
         virtual ~HttpRequest();
         
         std::string* gen();
+	bool parseBody(const std::string &line);
     protected:
         bool parseStartingLine(const std::string &line);
-        void parseBody(const std::string &line);
     };
 }
 
