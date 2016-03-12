@@ -1,5 +1,6 @@
 #include "Http/Http.h"
 #include <cstring>
+#include <sstream>
 
 using namespace SiTNetwork;
 
@@ -12,7 +13,9 @@ const char* Http::METHOD_STRING[] = {"OPTIONS","GET","HEAD","POST","PUT","DELETE
 
 Http::Http():
 _method(METHOD::GET),
-_leftLoadDate(0),
+_leftLoadBody(0),
+_isChunked(false),
+_isDateSize(true),
 _parsePosition(0),
 _parseStatus(PARSE_STATUS::PARSE_STARTLINE)
 {
@@ -25,7 +28,9 @@ Http::~Http()
 void Http::clear()
 {
     _parsePosition = 0;
-    _leftLoadDate = 0;
+    _leftLoadBody = 0;
+    _isChunked = false;
+    _isDateSize = true;
     _parseStatus = PARSE_STATUS::PARSE_STARTLINE;
     _http.clear();
     _headers.clear();
@@ -57,9 +62,23 @@ bool Http::parse()
 		if (next == std::string::npos)return true;
 		if(!parseHead(_http.substr(_parsePosition, next)))return false;
 		_parsePosition = next+(unsigned)strlen(strTwoCRLF);
+		
+		if(_isChunked && _http.size()-_parsePosition > 0)
+		{
+		    std::string tmp = _http.substr(_parsePosition);
+		    _http = _http.substr(0,_parsePosition);
+		    if(!parseNewChunked(tmp))
+		    {
+			_http.append(tmp);
+			return false;
+		    }
+		} else 
+		{
+		    _leftLoadBody-=_http.size()-_parsePosition;
+		}
 		break;
 	    case PARSE_STATUS::PARSE_BODY:
-		if(_leftLoadDate!=0)return true;
+		if(_leftLoadBody!=0 || _isChunked)return true;
 		if(!parseBody(_http.substr(_parsePosition)) )return false;
 		_parsePosition = _http.size();
 		break;
@@ -75,11 +94,71 @@ bool Http::parse(const std::string &request)
     return parse();
 }
 
-void Http::parseNewDate(const std::string& date)
+bool Http::parseNewDate(const std::string& date)
 {
-    _http.append(date);
-    parse();
+    if(_isChunked)
+    {
+	if(!parseNewChunked(date))return false;
+    }
+    else
+    {
+	if(_parseStatus==PARSE_STATUS::PARSE_BODY)
+	    _leftLoadBody-=date.size();
+	_http.append(date);
+	if(!parse())return false;
+    }
+    return true;
 }
+
+bool Http::parseNewChunked(const std::string& date)
+{
+    std::string chunk;
+    if(!_tempChunked.empty())
+    {
+	chunk.append(_tempChunked);
+	_tempChunked.clear();
+    }
+    chunk.append(date);
+        
+    size_t next, delta, position = 0;
+    std::string tmp;
+    
+    while(position<date.size())
+    {
+	next = findNewLine(chunk, position, delta);
+	if (next == std::string::npos)
+	{
+	    if(_isDateSize)
+	    {
+		_tempChunked.append(chunk.substr(position));
+	    }else
+	    {
+		_http.append(chunk.substr(position));
+	    }
+	    return true;
+	}
+	
+	tmp = chunk.substr(position, next-position);
+	position = next + delta;
+	
+	if(_isDateSize)
+	{
+	    unsigned int size = hexToDec(tmp);
+	    if(size==0)_isChunked = false;
+	    _leftLoadBody+= size;
+	    _isDateSize=false;
+	}
+	else
+	{
+	    _http.append(tmp);
+	    _leftLoadBody-=tmp.size();
+	    _isDateSize=true;
+	}
+    }   
+    
+    return parse();
+}
+
 
 bool Http::parseStartingLine(const std::string &line)
 {
@@ -95,11 +174,19 @@ bool Http::parseHead(const std::string& head)
         if(!parseHeader(head.substr(prev, next-prev)))return false;
 	prev = next+delta;
     }
+    _parseStatus = PARSE_STATUS::PARSE_BODY;
+    
+    std::string transferEncoding = getHeader("Transfer-Encoding");
+    if(!transferEncoding.empty() && transferEncoding == "chunked")
+    {
+	_isChunked = true;
+	return true;
+    }
     
     std::string contentLength = getHeader("Content-Length");
-    if(!contentLength.empty()) _leftLoadDate = atoi(contentLength.c_str());
-    
-    _parseStatus = PARSE_STATUS::PARSE_BODY;
+    if(!contentLength.empty())
+	_leftLoadBody = atoi(contentLength.c_str());    
+
     return true;
 }
 
@@ -311,6 +398,12 @@ std::vector<std::pair<std::string, std::string> > Http::getVars() const
     return _vars;
 }
 
+Http::PARSE_STATUS Http::getParseStatus()
+{
+    return _parseStatus;
+}
+
+
 std::string Http::getMethodAtString(METHOD method)
 {
     return METHOD_STRING[static_cast<unsigned>(method)];
@@ -341,4 +434,15 @@ Http::PROTOCOL Http::getProtocolFromString(const std::string& protocol)
 	i++;
     }
     return static_cast<PROTOCOL>(i);
+}
+
+unsigned int Http::hexToDec(const std::string& hex)
+{
+    unsigned int dec;
+    std::stringstream ss;
+    
+    ss << std::hex << hex;
+    ss >> dec;
+    
+    return dec;
 }

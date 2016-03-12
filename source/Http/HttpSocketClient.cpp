@@ -30,9 +30,8 @@ bool HttpSocketClient::read(HttpResponse& httpResponse)
 {
     char buffer[1025];
     int result;
-    std::ostringstream request;
     
-    while(true)
+    while(httpResponse.getParseStatus()!=Http::PARSE_STATUS::PARSE_END)
     {
         result = Socket::read(&buffer, 1024, 0);
         buffer[result]='\0';
@@ -40,16 +39,17 @@ bool HttpSocketClient::read(HttpResponse& httpResponse)
         {
             close();
             return false;
-        } else if (result > 0)
+        }
+	else if (result > 0)
         {
-            request << buffer;
+            if(!httpResponse.parseNewDate(buffer))return false;
         } else if (result == 0)
         {
             break;
         }
         memset(buffer, 0, sizeof(buffer));
     }
-    return httpResponse.parse(request.str());
+    return true;
 }
 
 bool HttpSocketClient::send(const HttpRequest& httpRequest)

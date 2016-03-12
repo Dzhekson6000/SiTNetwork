@@ -50,7 +50,9 @@ namespace SiTNetwork
         virtual std::string* gen();
 	bool parse();
         bool parse(const std::string &request);
-	void parseNewDate(const std::string &date);
+	
+	bool parseNewDate(const std::string &date);
+	bool parseNewChunked(const std::string &date);
 	
 	virtual bool parseStartingLine(const std::string &line);
 	bool parseHead(const std::string &head);
@@ -77,6 +79,7 @@ namespace SiTNetwork
         std::vector<std::pair<std::string, std::string>> getHeaders() const;
         std::vector<std::pair<std::string, std::string>> getVars() const;
         
+	PARSE_STATUS getParseStatus();
 	
         std::string getMethodAtString(METHOD method);
         METHOD getMethodFromString(const std::string& method);
@@ -95,7 +98,11 @@ namespace SiTNetwork
         std::string _body;
 	
 	unsigned int _parsePosition;
-	unsigned int _leftLoadDate;
+	unsigned int _leftLoadBody;
+	bool _isChunked;
+	bool _isDateSize;
+	std::string _tempChunked;
+	
 	PARSE_STATUS _parseStatus;
 	
         size_t findNewLine(const std::string &request, const size_t &begin, size_t& delta);
@@ -104,6 +111,8 @@ namespace SiTNetwork
         bool parseHeader(const std::string &line);
         void parseVars(const std::string &line);
         void parseVar(const std::string &line);
+	
+	unsigned int hexToDec(const std::string &hex);
     };
 }
 
