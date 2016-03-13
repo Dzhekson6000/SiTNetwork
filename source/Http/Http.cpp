@@ -16,6 +16,7 @@ _method(METHOD::GET),
 _leftLoadBody(0),
 _isChunked(false),
 _isDateSize(true),
+_isEndTransfer(false),
 _parsePosition(0),
 _parseStatus(PARSE_STATUS::PARSE_STARTLINE)
 {
@@ -31,12 +32,17 @@ void Http::clear()
     _leftLoadBody = 0;
     _isChunked = false;
     _isDateSize = true;
+    _isEndTransfer = false;
     _parseStatus = PARSE_STATUS::PARSE_STARTLINE;
     _http.clear();
     _headers.clear();
     _vars.clear();
 }
 
+void Http::endTransfer()
+{
+    _isEndTransfer = true;
+}
 
 std::string* Http::gen()
 {
@@ -76,13 +82,18 @@ bool Http::parse()
 			_http.append(tmp);
 			return false;
 		    }
-		} else 
+		}
+		else if(_isChunked)
+		{
+		    return true;
+		}
+		else if(!_isChunked) 
 		{
 		    _leftLoadBody-=_http.size()-_parsePosition;
 		}
 		break;
 	    case PARSE_STATUS::PARSE_BODY:
-		if(_leftLoadBody!=0 || _isChunked)return true;
+		if(!_isEndTransfer) return true;
 		if(!parseBody(_http.substr(_parsePosition)) )return false;
 		_body.begin = _parsePosition;
 		_parsePosition = _http.size();
@@ -150,7 +161,7 @@ bool Http::parseNewChunked(const std::string& date)
 	if(_isDateSize)
 	{
 	    unsigned int size = hexToDec(tmp);
-	    if(size==0)_isChunked = false;
+	    if(size==0)endTransfer();
 	    _leftLoadBody+= size;
 	    _isDateSize=false;
 	}

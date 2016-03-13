@@ -52,6 +52,7 @@ namespace SiTNetwork
         virtual ~Http();
 
 	void clear();
+	void endTransfer();
 	
         virtual std::string* gen();
 	bool parse();
@@ -110,6 +111,7 @@ namespace SiTNetwork
 	unsigned int _leftLoadBody;
 	bool _isChunked;
 	bool _isDateSize;
+	bool _isEndTransfer;
 	std::string _tempChunked;
 	
 	PARSE_STATUS _parseStatus;

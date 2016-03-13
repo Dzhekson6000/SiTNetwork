@@ -45,9 +45,15 @@ bool HttpSocketClient::read(HttpResponse& httpResponse)
             if(!httpResponse.parseNewDate(buffer))return false;
         } else if (result == 0)
         {
+	    if(httpResponse.getParseStatus()!=Http::PARSE_STATUS::PARSE_END)
+	    {
+		httpResponse.endTransfer();
+		httpResponse.parse();
+	    }
             break;
         }
         memset(buffer, 0, sizeof(char)*_bufferSize);
+	
     }
     return true;
 }
