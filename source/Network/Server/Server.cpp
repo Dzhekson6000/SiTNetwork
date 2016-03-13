@@ -8,14 +8,16 @@ _port(0),
 _onLogFunc(nullptr),
 _isClose(false),
 _isUseSSL(false)
-{}
+{
+}
 
 Server::Server(int port):
 _port(port),
 _onLogFunc(nullptr),
 _isClose(false),
 _isUseSSL(false)
-{}
+{
+}
 
 Server::~Server()
 {
@@ -34,16 +36,16 @@ void Server::start()
     socket.setTypeProtocol(Socket::TYPE_PROTOCOL::TCP);
     socket.setTypeSocket(Socket::TYPE_SOCKET::SERVER);
     socket.create();
-    
+
     Socket* socketClient = nullptr;
-    
+
     while(!_isClose)
     {
-        socketClient = new Socket();
-        if(socketClient->accept(socket))
-            newClient(socketClient);
-        else
-            delete socketClient;
+	socketClient = new Socket();
+	if(socketClient->accept(socket))
+	    newClient(socketClient);
+	else
+	    delete socketClient;
     }
 }
 
@@ -60,7 +62,7 @@ void Server::log(std::string message)
 void Server::newClient(Socket* socketClient)
 {
     if(_onNewClientFunc)
-        _onNewClientFunc(socketClient);
+	_onNewClientFunc(socketClient);
 }
 
 void Server::setNewClientFunc(OnNewClientFunc onNewClientFunc)

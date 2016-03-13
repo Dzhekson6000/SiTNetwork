@@ -5,27 +5,28 @@
 
 namespace SiTNetwork
 {
-    class HttpResponse:public Http {
+    class HttpResponse: public Http
+    {
     public:
-        HttpResponse();
-        virtual ~HttpResponse();
+	typedef std::map<int, const char *> mapStatus;
+	HttpResponse();
+	virtual		    ~HttpResponse();
 
-        std::string* gen();
-	bool parseBody(const std::string &line);
-        
-        void setStatus(unsigned int status);
-        void setBody(const std::string &body);
-	
-        unsigned int getStatus();
-        static const char* getStatus(int status);
+	std::string*	    gen();
+	bool		    parseBody(const std::string &line);
+
+	void		    setStatus(unsigned int status);
+	void		    setBody(const std::string &body);
+
+	unsigned int	    getStatus();
+	static const char*  getStatus(int status);
     protected:
-        unsigned int _status;
-        static std::map<int, const char *> _statuses;
-        
-        bool parseStartingLine(const std::string &line);
-	
-	std::string _bodyResponse;
-    };
+	unsigned int	    _status;
+	static mapStatus    _statuses;
+	std::string	    _bodyResponse;
+
+	bool		    parseStartingLine(const std::string &line);
+    } ;
 }
 
 #endif /* HTTPRESPONSE_H */

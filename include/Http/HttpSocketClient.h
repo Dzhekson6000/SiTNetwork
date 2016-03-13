@@ -9,15 +9,15 @@ namespace SiTNetwork
     class HttpSocketClient: public Socket
     {
     public:
-        HttpSocketClient();
-        HttpSocketClient(int port);
-        HttpSocketClient(const char *host, int port);
-        virtual ~HttpSocketClient();
-        
-        bool read(HttpResponse& httpResponse);
-        bool send(const HttpRequest& httpRequest);
+	HttpSocketClient();
+	HttpSocketClient(int port);
+	HttpSocketClient(const char *host, int port);
+	virtual	~HttpSocketClient();
+
+	bool	read(HttpResponse& httpResponse);
+	bool	send(const HttpRequest& httpRequest);
     private:
-    };
+    } ;
 }
 
 #endif /* HTTPSOCKETCLIENT_H */

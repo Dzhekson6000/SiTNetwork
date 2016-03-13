@@ -4,8 +4,7 @@
 
 using namespace SiTNetwork;
 
-std::map<int, const char *> HttpResponse::_statuses =
-{
+std::map<int, const char *> HttpResponse::_statuses ={
     {100, "Continue"},
     {101, "Switching Protocols"},
     {200, "OK"},
@@ -57,27 +56,27 @@ HttpResponse::~HttpResponse()
 std::string* HttpResponse::gen()
 {
     char statusStr[6] = "";
-    snprintf(statusStr, 6,"%d",_status);
-    
+    snprintf(statusStr, 6, "%d", _status);
+
     _http.clear();
     _startingLine.begin = _http.size();
     _http.append(getProtocolAtString(_protocol));
     _http.append(" ").append(statusStr);
     _http.append(" ").append(getStatus(_status)).append("\r\n");
     _startingLine.end = _http.size();
-    
+
     _head.begin = _http.size();
     for(auto header: _headers)
     {
-        _http.append(header.first).append(": ").append(header.second).append("\r\n");
+	_http.append(header.first).append(": ").append(header.second).append("\r\n");
     }
     _head.end = _http.size();
     _http.append("\r\n");
-    
+
     _body.begin = _http.size();
     _http.append(_bodyResponse);
     _body.end = _http.size();
-    
+
     return &_http;
 }
 
@@ -85,22 +84,22 @@ bool HttpResponse::parseStartingLine(const std::string &line)
 {
     std::string findStr(" ");
     std::string tmp;
-    
+
     size_t prev = 0;
     size_t delta = findStr.length();
-    
+
     //parse protocol
     size_t next=line.find(findStr, prev);
     if (next == std::string::npos)
-        return false;
+	return false;
     tmp = line.substr(prev, next-prev);
     prev = next+delta;
-    
+
     setProtocol(getProtocolFromString(tmp));
-    
+
     //parse status
     tmp = line.substr(prev);
-    setStatus(std::stoi(tmp,nullptr));
+    setStatus(std::stoi(tmp, nullptr));
     return Http::parseStartingLine(line);
 }
 
@@ -119,7 +118,6 @@ void HttpResponse::setBody(const std::string& body)
 {
     _bodyResponse = body;
 }
-
 
 unsigned int HttpResponse::getStatus()
 {

@@ -8,10 +8,10 @@ const char* strCRLF = "\r\n";
 const char* strTwoCRLF = "\r\n\r\n";
 const char* strLF = "\n";
 
-const char* Http::PROTOCOL_STRING[] = {"HTTP/0.9","HTTP/1.0","HTTP/1.1","HTTP/2"};
-const char* Http::METHOD_STRING[] = {"OPTIONS","GET","HEAD","POST","PUT","DELETE","TRACE","CONNECT"};
+const char* Http::PROTOCOL_STRING[] ={"HTTP/0.9", "HTTP/1.0", "HTTP/1.1", "HTTP/2"};
+const char* Http::METHOD_STRING[] ={"OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "CONNECT"};
 
-Http::Http():
+Http::Http() :
 _method(METHOD::GET),
 _leftLoadBody(0),
 _isChunked(false),
@@ -53,49 +53,49 @@ std::string* Http::gen()
 bool Http::parse()
 {
     size_t next, delta;
-    
-    while(_parseStatus != PARSE_STATUS::PARSE_END)
+
+    while (_parseStatus != PARSE_STATUS::PARSE_END)
     {
-	switch(_parseStatus)
+	switch (_parseStatus)
 	{
 	    case PARSE_STATUS::PARSE_STARTLINE:
 		next = findNewLine(_http, 0, delta);
 		if (next == std::string::npos)return true;
-		if(!parseStartingLine(_http.substr(0, next)))return false;
+		if (!parseStartingLine(_http.substr(0, next)))return false;
 		_startingLine.begin = _parsePosition;
-		_parsePosition = next+delta;
+		_parsePosition = next + delta;
 		_startingLine.end = _parsePosition;
 		break;
 	    case PARSE_STATUS::PARSE_HEAD:
 		next = _http.find(strTwoCRLF, _parsePosition);
 		if (next == std::string::npos)return true;
-		if(!parseHead(_http.substr(_parsePosition, next-_parsePosition)))return false;
+		if (!parseHead(_http.substr(_parsePosition, next - _parsePosition)))return false;
 		_head.begin = _parsePosition;
-		_parsePosition = next+(unsigned)strlen(strTwoCRLF);
+		_parsePosition = next + (unsigned) strlen(strTwoCRLF);
 		_head.end = _parsePosition;
-		
-		if(_isChunked && _http.size()-_parsePosition > 0)
+
+		if (_isChunked && _http.size() - _parsePosition > 0)
 		{
 		    std::string tmp = _http.substr(_parsePosition);
-		    _http = _http.substr(0,_parsePosition);
-		    if(!parseNewChunked(tmp))
+		    _http = _http.substr(0, _parsePosition);
+		    if (!parseNewChunked(tmp))
 		    {
 			_http.append(tmp);
 			return false;
 		    }
 		}
-		else if(_isChunked)
+		else if (_isChunked)
 		{
 		    return true;
 		}
-		else if(!_isChunked) 
+		else if (!_isChunked)
 		{
-		    _leftLoadBody-=_http.size()-_parsePosition;
+		    _leftLoadBody -= _http.size() - _parsePosition;
 		}
 		break;
 	    case PARSE_STATUS::PARSE_BODY:
-		if(!_isEndTransfer && (!_isKnowSize || _leftLoadBody != 0) ) return true;
-		if(!parseBody(_http.substr(_parsePosition)) )return false;
+		if (!_isEndTransfer && (!_isKnowSize || _leftLoadBody != 0)) return true;
+		if (!parseBody(_http.substr(_parsePosition)))return false;
 		_body.begin = _parsePosition;
 		_parsePosition = _http.size();
 		_body.end = _parsePosition;
@@ -114,16 +114,16 @@ bool Http::parse(const std::string &request)
 
 bool Http::parseNewDate(const std::string& date)
 {
-    if(_isChunked)
+    if (_isChunked)
     {
-	if(!parseNewChunked(date))return false;
+	if (!parseNewChunked(date))return false;
     }
     else
     {
-	if(_parseStatus==PARSE_STATUS::PARSE_BODY)
-	    _leftLoadBody-=date.size();
+	if (_parseStatus == PARSE_STATUS::PARSE_BODY)
+	    _leftLoadBody -= date.size();
 	_http.append(date);
-	if(!parse())return false;
+	if (!parse())return false;
     }
     return true;
 }
@@ -131,52 +131,52 @@ bool Http::parseNewDate(const std::string& date)
 bool Http::parseNewChunked(const std::string& date)
 {
     std::string chunk;
-    if(!_tempChunked.empty())
+    if (!_tempChunked.empty())
     {
 	chunk.append(_tempChunked);
 	_tempChunked.clear();
     }
     chunk.append(date);
-        
+
     size_t next, delta, position = 0;
     std::string tmp;
-    
-    while(position<date.size())
+
+    while (position < date.size())
     {
 	next = findNewLine(chunk, position, delta);
 	if (next == std::string::npos)
 	{
-	    if(_isDateSize)
+	    if (_isDateSize)
 	    {
 		_tempChunked.append(chunk.substr(position));
-	    }else
+	    }
+	    else
 	    {
 		_http.append(chunk.substr(position));
 	    }
 	    return true;
 	}
-	
-	tmp = chunk.substr(position, next-position);
+
+	tmp = chunk.substr(position, next - position);
 	position = next + delta;
-	
-	if(_isDateSize)
+
+	if (_isDateSize)
 	{
 	    unsigned int size = hexToDec(tmp);
-	    if(size==0)endTransfer();
-	    _leftLoadBody+= size;
-	    _isDateSize=false;
+	    if (size == 0)endTransfer();
+	    _leftLoadBody += size;
+	    _isDateSize = false;
 	}
 	else
 	{
 	    _http.append(tmp);
-	    _leftLoadBody-=tmp.size();
-	    _isDateSize=true;
+	    _leftLoadBody -= tmp.size();
+	    _isDateSize = true;
 	}
-    }   
-    
+    }
+
     return parse();
 }
-
 
 bool Http::parseStartingLine(const std::string &line)
 {
@@ -187,22 +187,22 @@ bool Http::parseStartingLine(const std::string &line)
 bool Http::parseHead(const std::string& head)
 {
     size_t delta, next, prev = 0;
-    while( (next=findNewLine(head, prev, delta)) != std::string::npos && prev != next)
+    while ((next = findNewLine(head, prev, delta)) != std::string::npos && prev != next)
     {
-        if(!parseHeader(head.substr(prev, next-prev)))return false;
-	prev = next+delta;
+	if (!parseHeader(head.substr(prev, next - prev)))return false;
+	prev = next + delta;
     }
     _parseStatus = PARSE_STATUS::PARSE_BODY;
-    
+
     std::string transferEncoding = getHeader("Transfer-Encoding");
-    if(!transferEncoding.empty() && transferEncoding == "chunked")
+    if (!transferEncoding.empty() && transferEncoding == "chunked")
     {
 	_isChunked = true;
 	return true;
     }
-    
+
     std::string contentLength = getHeader("Content-Length");
-    if(!contentLength.empty())
+    if (!contentLength.empty())
     {
 	_isKnowSize = true;
 	_leftLoadBody = atoi(contentLength.c_str());
@@ -222,11 +222,11 @@ size_t Http::findNewLine(const std::string& request, const size_t& begin, size_t
     size_t next = request.find(strCRLF, begin);
     if (next != std::string::npos)
     {
-        delta = (unsigned)strlen(strCRLF);
-        return next;
+	delta = (unsigned) strlen(strCRLF);
+	return next;
     }
     next = request.find(strLF, begin);
-    delta = (unsigned)strlen(strLF);
+    delta = (unsigned) strlen(strLF);
     return next;
 }
 
@@ -237,35 +237,34 @@ std::string Http::parsePath(const std::string &url)
     std::string tmp;
     size_t prev = 0;
     size_t delta = findStr.length();
-    
-    size_t next=url.find(findStr, prev);
+
+    size_t next = url.find(findStr, prev);
     if (next == std::string::npos)
-        return url;
-    path = url.substr(prev, next-prev);
-    prev = next+delta;
-    
+	return url;
+    path = url.substr(prev, next - prev);
+    prev = next + delta;
+
     tmp = url.substr(prev);
     parseVars(tmp);
-    
+
     return path;
 }
-
 
 bool Http::parseHeader(const std::string &line)
 {
     std::string findStr(": ");
     std::string key;
     std::string value;
-    
+
     size_t prev = 0;
     size_t delta = findStr.length();
-    
-    size_t next=line.find(findStr, prev);
+
+    size_t next = line.find(findStr, prev);
     if (next == std::string::npos)
-        return false;
-    
-    key = line.substr(prev, next-prev);
-    prev = next+delta;
+	return false;
+
+    key = line.substr(prev, next - prev);
+    prev = next + delta;
     value = line.substr(prev);
     addHeader(key, value);
     return true;
@@ -275,22 +274,22 @@ void Http::parseVars(const std::string& line)
 {
     std::string findStr("&");
     std::string tmp;
-    
+
     size_t next;
     size_t prev = 0;
     size_t delta = findStr.length();
-    
-    while( (next=line.find(findStr,prev)) != std::string::npos)
+
+    while ((next = line.find(findStr, prev)) != std::string::npos)
     {
-        tmp = line.substr(prev, next-prev);
-        prev = next+delta;
-        parseVar(tmp);
+	tmp = line.substr(prev, next - prev);
+	prev = next + delta;
+	parseVar(tmp);
     }
-    
+
     tmp = line.substr(prev);
-    if(tmp!="")
-        parseVar(tmp);
-    
+    if (tmp != "")
+	parseVar(tmp);
+
 }
 
 void Http::parseVar(const std::string& line)
@@ -298,20 +297,19 @@ void Http::parseVar(const std::string& line)
     std::string findStr("=");
     std::string key;
     std::string value;
-    
+
     size_t prev = 0;
     size_t delta = findStr.length();
-    
-    size_t next=line.find(findStr, prev);
+
+    size_t next = line.find(findStr, prev);
     if (next == std::string::npos)
-        return;
-    
-    key = line.substr(prev, next-prev);
-    prev = next+delta;
+	return;
+
+    key = line.substr(prev, next - prev);
+    prev = next + delta;
     value = line.substr(prev);
     addVar(key, value);
 }
-
 
 void Http::setMethod(METHOD method)
 {
@@ -330,11 +328,13 @@ void Http::setProtocol(PROTOCOL protocol)
 
 void Http::addHeader(std::string key, std::string value)
 {
-    for(auto &header : _headers) {
-        if (header.first == key) {
-            header.second = value;
-            return;
-        }
+    for (auto &header : _headers)
+    {
+	if (header.first == key)
+	{
+	    header.second = value;
+	    return;
+	}
     }
     _headers.push_back(std::make_pair(key, value));
 }
@@ -346,11 +346,13 @@ void Http::setHeaders(std::vector<std::pair<std::string, std::string> >& headers
 
 void Http::addVar(std::string key, std::string value)
 {
-    for(auto &var : _vars) {
-        if (var.first == key) {
-            var.second = value;
-            return;
-        }
+    for (auto &var : _vars)
+    {
+	if (var.first == key)
+	{
+	    var.second = value;
+	    return;
+	}
     }
     _vars.push_back(std::make_pair(key, value));
 }
@@ -369,7 +371,6 @@ const std::string Http::getHead() const
 {
     return _http.substr(_head.begin, _head.end - _head.begin);
 }
-
 
 const std::string Http::getBody() const
 {
@@ -393,24 +394,24 @@ Http::PROTOCOL Http::getProtocol() const
 
 std::string Http::getHeader(std::string key) const
 {
-    for(auto &header : _headers)
+    for (auto &header : _headers)
     {
-        if (header.first == key)
-        {
-            return header.second;
-        }
+	if (header.first == key)
+	{
+	    return header.second;
+	}
     }
     return "";
 }
 
 std::string Http::getVar(std::string key) const
 {
-    for(auto &var : _vars)
+    for (auto &var : _vars)
     {
-        if (var.first == key)
-        {
-            return var.second;
-        }
+	if (var.first == key)
+	{
+	    return var.second;
+	}
     }
     return "";
 }
@@ -430,46 +431,45 @@ Http::PARSE_STATUS Http::getParseStatus()
     return _parseStatus;
 }
 
-
 std::string Http::getMethodAtString(METHOD method)
 {
-    return METHOD_STRING[static_cast<unsigned>(method)];
+    return METHOD_STRING[static_cast<unsigned> (method)];
 }
 
 Http::METHOD Http::getMethodFromString(const std::string &method)
 {
     int i = 0;
-    for(auto methodString: METHOD_STRING)
+    for (auto methodString : METHOD_STRING)
     {
-	if(methodString==method)break;
+	if (methodString == method)break;
 	i++;
     }
-    return static_cast<METHOD>(i);
+    return static_cast<METHOD> (i);
 }
 
 std::string Http::getProtocolAtString(PROTOCOL protocol)
 {
-    return PROTOCOL_STRING[static_cast<unsigned>(protocol)];
+    return PROTOCOL_STRING[static_cast<unsigned> (protocol)];
 }
 
 Http::PROTOCOL Http::getProtocolFromString(const std::string& protocol)
 {
     int i = 0;
-    for(auto protocolString: PROTOCOL_STRING)
+    for (auto protocolString : PROTOCOL_STRING)
     {
-	if(protocolString==protocol)break;
+	if (protocolString == protocol)break;
 	i++;
     }
-    return static_cast<PROTOCOL>(i);
+    return static_cast<PROTOCOL> (i);
 }
 
 unsigned int Http::hexToDec(const std::string& hex)
 {
     unsigned int dec;
     std::stringstream ss;
-    
+
     ss << std::hex << hex;
     ss >> dec;
-    
+
     return dec;
 }

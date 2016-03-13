@@ -1,5 +1,5 @@
 #ifndef SERVER_H
-#define	SERVER_H
+#define SERVER_H
 
 #include <string.h>
 #include <functional>
@@ -11,35 +11,34 @@
 
 namespace SiTNetwork
 {
-
-typedef std::function<void(std::string)> OnLogFunc;
-typedef std::function<void(Socket* clientSocket)> OnNewClientFunc;
-
-    class Server {
+    typedef std::function<void(std::string)>		OnLogFunc;
+    typedef std::function<void(Socket* clientSocket)>	OnNewClientFunc;
+    class Server
+    {
     public:
-        Server();
-        Server(int port);
-        virtual ~Server();
-        void start();
-        void stop();
-        void setLogFunc(OnLogFunc onLogFunc);
+	Server();
+	Server(int port);
+	virtual		~Server();
+	void		start();
+	void		stop();
+	void		setLogFunc(OnLogFunc onLogFunc);
 
-        void setNewClientFunc(OnNewClientFunc onNewClientFunc);
-        void setUseSSL(bool isUseSSL);
-        bool getUseSSL();
-        
-        
-        static void* run(void* thisPtr);
+	void		setNewClientFunc(OnNewClientFunc onNewClientFunc);
+	void		setUseSSL(bool isUseSSL);
+	bool		getUseSSL();
+
+
+	static void*	run(void* thisPtr);
     private:
-        bool _isUseSSL;
-        int _port;
-        bool _isClose;
-        void log(std::string message);
-        void newClient(Socket* socketClient); 
+	bool		_isUseSSL;
+	int		_port;
+	bool		_isClose;
+	void		log(std::string message);
+	void		newClient(Socket* socketClient);
 
-        OnLogFunc _onLogFunc;
-        OnNewClientFunc _onNewClientFunc;
-    };
+	OnLogFunc	_onLogFunc;
+	OnNewClientFunc	_onNewClientFunc;
+    } ;
 }
 
-#endif	/* SERVER_H */
+#endif /* SERVER_H */

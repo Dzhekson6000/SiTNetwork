@@ -19,67 +19,66 @@ typedef int SOCKET;
 
 namespace SiTNetwork
 {
-
     class Socket
     {
     public:
-        enum TYPE_SOCKET
-        {
-            CLIENT,
-            SERVER
-        };
-        
-        enum TYPE_PROTOCOL
-        {
-            TCP,
-            UDP
-        };
-        
-        Socket();
-        Socket(int port);
-        Socket(const char *host, int port);
-        virtual ~Socket();
-        
-        bool create();
-        void close();
-        bool accept(const Socket& socket);
-        SOCKET getSocket() const;
-        
-        void setSocket(SOCKET socket);
-        
-        void setUseSSL(bool isUseSSL);
-        bool getUseSSL() const;
-        
-        void setTypeSocket(TYPE_SOCKET type_socket);
-        void setTypeProtocol(TYPE_PROTOCOL type_protocol);
-        
-        void setHost(const char *host);
-        
-	void setBufferSize(unsigned int bufferSize);
-	
-        ssize_t send(const void * buffer, size_t n, int flags);
-        ssize_t read(void * buffer, size_t n, int flags);
-        bool    sendFile(std::string path);
+	enum TYPE_SOCKET
+	{
+	    CLIENT,
+	    SERVER
+	} ;
+	enum TYPE_PROTOCOL
+	{
+	    TCP,
+	    UDP
+	} ;
+
+	Socket();
+	Socket(int port);
+	Socket(const char *host, int port);
+	virtual		    ~Socket();
+
+	bool		    create();
+	void		    close();
+	bool		    accept(const Socket& socket);
+	SOCKET		    getSocket() const;
+
+	void		    setSocket(SOCKET socket);
+
+	void		    setUseSSL(bool isUseSSL);
+	bool		    getUseSSL() const;
+
+	void		    setTypeSocket(TYPE_SOCKET type_socket);
+	void		    setTypeProtocol(TYPE_PROTOCOL type_protocol);
+
+	void		    setHost(const char *host);
+
+	void		    setBufferSize(unsigned int bufferSize);
+
+	ssize_t		    send(const void * buffer, size_t n, int flags);
+	ssize_t		    read(void * buffer, size_t n, int flags);
+	bool		    sendFile(std::string path);
     protected:
-	unsigned int _bufferSize;
+	unsigned int	    _bufferSize;
     private:
-        struct sockaddr_in _socketaddr;
-        SOCKET _socket;
-        const char * _host;
-        int _port;
-        bool _isUseSSL;
-        
-        TYPE_SOCKET _type_socket;
-        TYPE_PROTOCOL _type_protocol;
-        
-        void createAddres();
-        unsigned long getHostAddress(const char* host);
-        
-        bool initializeSSL();
-        void destroySSL();
-        SSL_CTX* _ctx;
-        SSL*     _ssl;
-    };
+	struct sockaddr_in  _socketaddr;
+	SOCKET		    _socket;
+	const char*	    _host;
+	int		    _port;
+
+	bool		    _isUseSSL;
+	SSL_CTX*	    _ctx;
+	SSL*		    _ssl;
+
+	TYPE_SOCKET	    _type_socket;
+	TYPE_PROTOCOL	    _type_protocol;
+
+	void		    createAddres();
+	unsigned long	    getHostAddress(const char* host);
+
+	bool		    initializeSSL();
+	void		    destroySSL();
+    } ;
 }
 
 #endif /* SOCKET_H */

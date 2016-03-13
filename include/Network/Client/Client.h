@@ -5,13 +5,14 @@
 
 namespace SiTNetwork
 {
-    class Client {
+    class Client
+    {
     public:
-        Client();
-        Client(std::string host, int port);
-        virtual ~Client();
+	Client();
+	Client(std::string host, int port);
+	virtual	~Client();
     private:
-    };
+    } ;
 }
 
 #endif /* CLIENT_H */
