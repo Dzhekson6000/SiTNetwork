@@ -109,6 +109,7 @@ namespace SiTNetwork
 	
 	unsigned int _parsePosition;
 	unsigned int _leftLoadBody;
+	bool _isKnowSize;
 	bool _isChunked;
 	bool _isDateSize;
 	bool _isEndTransfer;

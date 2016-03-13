@@ -17,6 +17,7 @@ _leftLoadBody(0),
 _isChunked(false),
 _isDateSize(true),
 _isEndTransfer(false),
+_isKnowSize(false),
 _parsePosition(0),
 _parseStatus(PARSE_STATUS::PARSE_STARTLINE)
 {
@@ -93,7 +94,7 @@ bool Http::parse()
 		}
 		break;
 	    case PARSE_STATUS::PARSE_BODY:
-		if(!_isEndTransfer) return true;
+		if(!_isEndTransfer && (!_isKnowSize || _leftLoadBody != 0) ) return true;
 		if(!parseBody(_http.substr(_parsePosition)) )return false;
 		_body.begin = _parsePosition;
 		_parsePosition = _http.size();
@@ -202,7 +203,10 @@ bool Http::parseHead(const std::string& head)
     
     std::string contentLength = getHeader("Content-Length");
     if(!contentLength.empty())
+    {
+	_isKnowSize = true;
 	_leftLoadBody = atoi(contentLength.c_str());
+    }
 
     return true;
 }
