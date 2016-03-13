@@ -14,7 +14,8 @@ namespace SiTNetwork
 	bool parseBody(const std::string &line);
         
         void setStatus(unsigned int status);
-        
+        void setBody(const std::string &body);
+	
         unsigned int getStatus();
         static const char* getStatus(int status);
     protected:
@@ -22,6 +23,8 @@ namespace SiTNetwork
         static std::map<int, const char *> _statuses;
         
         bool parseStartingLine(const std::string &line);
+	
+	std::string _bodyResponse;
     };
 }
 

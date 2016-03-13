@@ -9,6 +9,12 @@ namespace SiTNetwork
     class Http
     {
     public:
+	struct UnitDate
+	{
+	    unsigned int begin;
+	    unsigned int end;
+	};
+	
 	enum class PROTOCOL : unsigned int
 	{
 	    HTTP09 = 0,
@@ -61,13 +67,14 @@ namespace SiTNetwork
         void setMethod(METHOD method);
         void setPath(const std::string &path);
         void setProtocol(PROTOCOL protocol);
-        void setBody(const std::string &body);
         void addHeader(std::string key, std::string value);
         void setHeaders(std::vector<std::pair<std::string, std::string>>& headers);
         void addVar(std::string key, std::string value);
         
 	const std::string* getHttp() const;
-	const std::string* getBody() const;
+	const std::string getStartingLine() const;
+	const std::string getHead() const;
+	const std::string getBody() const;
         
 	METHOD getMethod();
         std::string getPath() const;
@@ -95,7 +102,9 @@ namespace SiTNetwork
         std::vector< std::pair<std::string, std::string>> _vars;
         
         std::string _http;
-        std::string _body;
+	UnitDate _startingLine;
+        UnitDate _head;
+	UnitDate _body;
 	
 	unsigned int _parsePosition;
 	unsigned int _leftLoadBody;

@@ -60,16 +60,23 @@ std::string* HttpResponse::gen()
     snprintf(statusStr, 6,"%d",_status);
     
     _http.clear();
-    //_http.append(_protocol);
+    _startingLine.begin = _http.size();
+    _http.append(getProtocolAtString(_protocol));
     _http.append(" ").append(statusStr);
     _http.append(" ").append(getStatus(_status)).append("\r\n");
+    _startingLine.end = _http.size();
     
+    _head.begin = _http.size();
     for(auto header: _headers)
     {
         _http.append(header.first).append(": ").append(header.second).append("\r\n");
     }
+    _head.end = _http.size();
     _http.append("\r\n");
-    _http.append(_body);
+    
+    _body.begin = _http.size();
+    _http.append(_bodyResponse);
+    _body.end = _http.size();
     
     return &_http;
 }
@@ -107,6 +114,12 @@ void HttpResponse::setStatus(unsigned int status)
 {
     _status = status;
 }
+
+void HttpResponse::setBody(const std::string& body)
+{
+    _bodyResponse = body;
+}
+
 
 unsigned int HttpResponse::getStatus()
 {

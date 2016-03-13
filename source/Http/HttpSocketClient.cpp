@@ -28,12 +28,12 @@ HttpSocketClient::~HttpSocketClient()
 
 bool HttpSocketClient::read(HttpResponse& httpResponse)
 {
-    char buffer[1025];
+    char* buffer = new char[_bufferSize+1];
     int result;
     
     while(httpResponse.getParseStatus()!=Http::PARSE_STATUS::PARSE_END)
     {
-        result = Socket::read(&buffer, 1024, 0);
+        result = Socket::read(buffer, _bufferSize, 0);
         buffer[result]='\0';
         if (result == SOCKET_ERROR)
         {
@@ -47,7 +47,7 @@ bool HttpSocketClient::read(HttpResponse& httpResponse)
         {
             break;
         }
-        memset(buffer, 0, sizeof(buffer));
+        memset(buffer, 0, sizeof(char)*_bufferSize);
     }
     return true;
 }

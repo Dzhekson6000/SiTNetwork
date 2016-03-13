@@ -55,13 +55,17 @@ bool Http::parse()
 		next = findNewLine(_http, 0, delta);
 		if (next == std::string::npos)return true;
 		if(!parseStartingLine(_http.substr(0, next)))return false;
+		_startingLine.begin = _parsePosition;
 		_parsePosition = next+delta;
+		_startingLine.end = _parsePosition;
 		break;
 	    case PARSE_STATUS::PARSE_HEAD:
 		next = _http.find(strTwoCRLF, _parsePosition);
 		if (next == std::string::npos)return true;
-		if(!parseHead(_http.substr(_parsePosition, next)))return false;
+		if(!parseHead(_http.substr(_parsePosition, next-_parsePosition)))return false;
+		_head.begin = _parsePosition;
 		_parsePosition = next+(unsigned)strlen(strTwoCRLF);
+		_head.end = _parsePosition;
 		
 		if(_isChunked && _http.size()-_parsePosition > 0)
 		{
@@ -80,7 +84,9 @@ bool Http::parse()
 	    case PARSE_STATUS::PARSE_BODY:
 		if(_leftLoadBody!=0 || _isChunked)return true;
 		if(!parseBody(_http.substr(_parsePosition)) )return false;
+		_body.begin = _parsePosition;
 		_parsePosition = _http.size();
+		_body.end = _parsePosition;
 		break;
 	}
     }
@@ -185,7 +191,7 @@ bool Http::parseHead(const std::string& head)
     
     std::string contentLength = getHeader("Content-Length");
     if(!contentLength.empty())
-	_leftLoadBody = atoi(contentLength.c_str());    
+	_leftLoadBody = atoi(contentLength.c_str());
 
     return true;
 }
@@ -307,11 +313,6 @@ void Http::setProtocol(PROTOCOL protocol)
     _protocol = protocol;
 }
 
-void Http::setBody(const std::string &body)
-{
-    _body = body;
-}
-
 void Http::addHeader(std::string key, std::string value)
 {
     for(auto &header : _headers) {
@@ -344,9 +345,20 @@ const std::string* Http::getHttp() const
     return &_http;
 }
 
-const std::string* Http::getBody() const
+const std::string Http::getStartingLine() const
 {
-    return &_body;
+    return _http.substr(_startingLine.begin, _startingLine.end - _startingLine.begin);
+}
+
+const std::string Http::getHead() const
+{
+    return _http.substr(_head.begin, _head.end - _head.begin);
+}
+
+
+const std::string Http::getBody() const
+{
+    return _http.substr(_body.begin, _body.end - _body.begin);
 }
 
 Http::METHOD Http::getMethod()

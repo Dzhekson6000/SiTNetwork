@@ -13,27 +13,35 @@ HttpRequest::~HttpRequest()
 std::string* HttpRequest::gen()
 {
     _http.clear();
-    _body.clear();
+    _startingLine.begin = _http.size();
     _http.append(getMethodAtString(_method));
     _http.append(" ").append(_path);
     _http.append(" ").append(getProtocolAtString(_protocol)).append("\r\n");
+    _startingLine.begin = _http.size();
     
+    std::string body;
     bool isBegin = true;
     for(auto var: _vars)
     {
-        if(!isBegin)_body.append("&");
-        _body.append(var.first).append("=").append(var.second);
+        if(!isBegin)body.append("&");
+        body.append(var.first).append("=").append(var.second);
         isBegin = false;
     }
-    addHeader("Content-Length", std::to_string(_body.size()));
     
+    if(!_isChunked)addHeader("Content-Length", std::to_string(body.size()));
+    
+    _head.begin = _http.size();
     for(auto header: _headers)
     {
         _http.append(header.first).append(": ").append(header.second).append("\r\n");
     }
+    _head.end = _http.size();
+    
     
     _http.append("\r\n");
-    _http.append(_body);
+    _body.begin = _http.size();
+    _http.append(body);
+    _body.end = _http.size();
     
     return &_http;
 }
