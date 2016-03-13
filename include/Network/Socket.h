@@ -15,6 +15,7 @@ typedef int SOCKET;
 
 #define DEFAULT_PORT 8000
 #define DEFAULT_LISTEN_LEN 10
+#define DEFAULT_BUFFER_SIZE 1024
 
 namespace SiTNetwork
 {
@@ -54,9 +55,13 @@ namespace SiTNetwork
         
         void setHost(const char *host);
         
+	void setBufferSize(unsigned int bufferSize);
+	
         ssize_t send(const void * buffer, size_t n, int flags);
         ssize_t read(void * buffer, size_t n, int flags);
         bool    sendFile(std::string path);
+    protected:
+	unsigned int _bufferSize;
     private:
         struct sockaddr_in _socketaddr;
         SOCKET _socket;

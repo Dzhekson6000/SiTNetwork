@@ -10,11 +10,14 @@
 
 using namespace SiTNetwork;
 
-Socket::Socket():_socket(0), _host(nullptr),_port(DEFAULT_PORT),_isUseSSL(false){}
+Socket::Socket():_socket(0), _host(nullptr),_port(DEFAULT_PORT),
+_bufferSize(DEFAULT_BUFFER_SIZE),_isUseSSL(false){}
 
-Socket::Socket(int port):_socket(0),_host(nullptr),_port(port),_isUseSSL(false){}
+Socket::Socket(int port):_socket(0),_host(nullptr),_port(port),
+_bufferSize(DEFAULT_BUFFER_SIZE),_isUseSSL(false){}
 
-Socket::Socket(const char *host, int port):_socket(0),_host(host),_port(port),_isUseSSL(false){}
+Socket::Socket(const char *host, int port):_socket(0),_host(host),_port(port),
+_bufferSize(DEFAULT_BUFFER_SIZE),_isUseSSL(false){}
 
 Socket::~Socket()
 {
@@ -240,6 +243,12 @@ void Socket::setHost(const char* host)
 {
     _host = host;
 }
+
+void Socket::setBufferSize(unsigned int bufferSize)
+{
+    _bufferSize = bufferSize;
+}
+
 
 void Socket::setTypeProtocol(TYPE_PROTOCOL type_protocol)
 {
