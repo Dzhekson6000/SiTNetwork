@@ -17,6 +17,8 @@ typedef int SOCKET;
 #define DEFAULT_LISTEN_LEN 10
 #define DEFAULT_BUFFER_SIZE 1024
 
+#define DEFAULT_TIMEOUT_READ 1024
+
 namespace SiTNetwork
 {
     class Socket
@@ -54,7 +56,9 @@ namespace SiTNetwork
 	void		    setHost(const char *host);
 
 	void		    setBufferSize(unsigned int bufferSize);
-
+	void		    setTimeOutRead(time_t sec);
+	
+	
 	ssize_t		    send(const void * buffer, size_t n, int flags);
 	ssize_t		    read(void * buffer, size_t n, int flags);
 	bool		    sendFile(std::string path);
@@ -72,6 +76,9 @@ namespace SiTNetwork
 
 	TYPE_SOCKET	    _type_socket;
 	TYPE_PROTOCOL	    _type_protocol;
+	
+	time_t		    _timeoutRead;
+	time_t		    _lastReadTime;
 
 	void		    createAddres();
 	unsigned long	    getHostAddress(const char* host);

@@ -27,7 +27,11 @@ std::string* HttpRequest::gen()
 	body.append(var.first).append("=").append(var.second);
 	isBegin = false;
     }
-
+    
+    if(!_isKeepAlive)
+	addHeader("Connection", "close");
+    else
+	addHeader("Connection", "Keep-Alive");
     if(!_isChunked)addHeader("Content-Length", std::to_string(body.size()));
 
     _head.begin = _http.size();

@@ -19,7 +19,8 @@ _isDateSize(true),
 _isEndTransfer(false),
 _isKnowSize(false),
 _parsePosition(0),
-_parseStatus(PARSE_STATUS::PARSE_STARTLINE)
+_parseStatus(PARSE_STATUS::PARSE_STARTLINE),
+_isKeepAlive(false)
 {
 }
 
@@ -35,9 +36,17 @@ void Http::clear()
     _isDateSize = true;
     _isEndTransfer = false;
     _parseStatus = PARSE_STATUS::PARSE_STARTLINE;
+    _isKeepAlive = false;
     _http.clear();
     _headers.clear();
     _vars.clear();
+    
+    _startingLine.begin=0;
+    _startingLine.end=0;
+    _head.begin=0;
+    _head.end=0;
+    _body.begin=0;
+    _body.end=0;
 }
 
 void Http::endTransfer()
@@ -193,7 +202,13 @@ bool Http::parseHead(const std::string& head)
 	prev = next + delta;
     }
     _parseStatus = PARSE_STATUS::PARSE_BODY;
-
+    
+    std::string keepAlive = getHeader("Connection");
+    if(keepAlive.empty() || keepAlive == "Keep-Alive" )
+    {
+	_isKeepAlive = true;
+    }
+    
     std::string transferEncoding = getHeader("Transfer-Encoding");
     if (!transferEncoding.empty() && transferEncoding == "chunked")
     {
@@ -473,3 +488,14 @@ unsigned int Http::hexToDec(const std::string& hex)
 
     return dec;
 }
+
+bool Http::isKeepAlive()
+{
+    return _isKeepAlive;
+}
+
+void Http::setKeepAlive(bool isKeepAlive)
+{
+    _isKeepAlive = isKeepAlive;
+}
+

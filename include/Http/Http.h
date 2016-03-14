@@ -92,6 +92,9 @@ namespace SiTNetwork
 
 	std::string		getProtocolAtString(PROTOCOL protocol);
 	PROTOCOL		getProtocolFromString(const std::string& protocol);
+	
+	bool			isKeepAlive();
+	void			setKeepAlive(bool isKeepAlive);
     protected:
 	METHOD                  _method;
 	PROTOCOL		_protocol;
@@ -114,6 +117,8 @@ namespace SiTNetwork
 	std::string		_tempChunked;
 
 	PARSE_STATUS		_parseStatus;
+	
+	bool			_isKeepAlive;
 
 	size_t			findNewLine(const std::string &request, const size_t &begin, size_t& delta);
 

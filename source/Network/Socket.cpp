@@ -11,17 +11,20 @@
 using namespace SiTNetwork;
 
 Socket::Socket():_socket(0), _host(nullptr), _port(DEFAULT_PORT),
-_bufferSize(DEFAULT_BUFFER_SIZE), _isUseSSL(false)
+_bufferSize(DEFAULT_BUFFER_SIZE), _isUseSSL(false),
+_timeoutRead(DEFAULT_TIMEOUT_READ), _lastReadTime(0)
 {
 }
 
 Socket::Socket(int port):_socket(0), _host(nullptr), _port(port),
-_bufferSize(DEFAULT_BUFFER_SIZE), _isUseSSL(false)
+_bufferSize(DEFAULT_BUFFER_SIZE), _isUseSSL(false),
+_timeoutRead(DEFAULT_TIMEOUT_READ), _lastReadTime(0)
 {
 }
 
 Socket::Socket(const char *host, int port):_socket(0), _host(host), _port(port),
-_bufferSize(DEFAULT_BUFFER_SIZE), _isUseSSL(false)
+_bufferSize(DEFAULT_BUFFER_SIZE), _isUseSSL(false),
+_timeoutRead(DEFAULT_TIMEOUT_READ), _lastReadTime(0)
 {
 }
 
@@ -255,6 +258,11 @@ void Socket::setBufferSize(unsigned int bufferSize)
     _bufferSize = bufferSize;
 }
 
+void Socket::setTimeOutRead(time_t sec)
+{
+    _timeoutRead = sec;
+}
+
 void Socket::setTypeProtocol(TYPE_PROTOCOL type_protocol)
 {
     _type_protocol = type_protocol;
@@ -300,6 +308,19 @@ ssize_t Socket::send(const void* buffer, size_t n, int flags)
 
 ssize_t Socket::read(void* buffer, size_t n, int flags)
 {
+    fd_set readSet;
+    FD_ZERO(&readSet);
+    FD_SET(getSocket(), &readSet);
+    
+    timeval timeout;
+    timeout.tv_sec = _timeoutRead;
+    timeout.tv_usec = 0;
+    if(select(getSocket()+1, &readSet, NULL, NULL, &timeout) <= 0)
+    {
+	close();
+	return SOCKET_ERROR;
+    }
+    
     ssize_t ret;
     if(_isUseSSL)
     {
