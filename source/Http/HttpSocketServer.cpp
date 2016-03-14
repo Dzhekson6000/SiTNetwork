@@ -28,6 +28,7 @@ HttpSocketServer::~HttpSocketServer()
 
 bool HttpSocketServer::read(HttpRequest& httpRequest)
 {
+    httpRequest.clear();
     char* buffer = new char[_bufferSize + 1];
     int result;
     
