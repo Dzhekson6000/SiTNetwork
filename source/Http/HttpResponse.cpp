@@ -64,7 +64,9 @@ std::string* HttpResponse::gen()
     _http.append(" ").append(statusStr);
     _http.append(" ").append(getStatus(_status)).append("\r\n");
     _startingLine.end = _http.size();
-
+    
+    if(!_isChunked)addHeader("Content-Length", std::to_string(_bodyResponse.size()));
+    
     _head.begin = _http.size();
     for(auto header: _headers)
     {
