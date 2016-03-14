@@ -1,5 +1,6 @@
 #include "Http/HttpSocketServer.h"
 #include <sstream>
+#include <string.h>
 
 using namespace SiTNetwork;
 
@@ -27,23 +28,34 @@ HttpSocketServer::~HttpSocketServer()
 
 bool HttpSocketServer::read(HttpRequest& httpRequest)
 {
-    char buffer[1025];
+    char* buffer = new char[_bufferSize + 1];
     int result;
-    std::ostringstream request;
-
-    result = Socket::read(buffer, 1024, 0);
-    buffer[1024]='\0';
-    if (result == SOCKET_ERROR)
+    
+    while (httpRequest.getParseStatus() != Http::PARSE_STATUS::PARSE_END)
     {
-	close();
-	return false;
+	result = Socket::read(buffer, _bufferSize, 0);
+	buffer[result] = '\0';
+	if (result == SOCKET_ERROR)
+	{
+	    close();
+	    return false;
+	}
+	else if (result > 0)
+	{
+	    if (!httpRequest.parseNewDate(buffer))return false;
+	}
+	else if (result == 0)
+	{
+	    if (httpRequest.getParseStatus() != Http::PARSE_STATUS::PARSE_END)
+	    {
+		httpRequest.endTransfer();
+		httpRequest.parse();
+	    }
+	    break;
+	}
+	memset(buffer, 0, sizeof (char)*_bufferSize);
     }
-    else if (result > 0)
-    {
-	request << buffer;
-    }
-
-    return httpRequest.parse(request.str());
+    return true;
 }
 
 bool HttpSocketServer::send(const HttpResponse& httpResponse)
