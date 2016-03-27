@@ -1,0 +1,39 @@
+FUNCTION(FIND_SOURCES path)
+FILE(GLOB LISTS_DIR RELATIVE ${path} ${path}/*)
+
+FOREACH (DIR ${LISTS_DIR})
+	IF(IS_DIRECTORY ${path}/${DIR})
+		FIND_SOURCES(${path}/${DIR})
+	ENDIF()
+ENDFOREACH(DIR)
+
+file(GLOB FILE_DIR_CPP "${path}/*.cpp")
+
+STRING(REGEX REPLACE ${PROJECT_ROOT} "" path ${path})
+STRING(REGEX REPLACE "/" "\\\\" path ${path})
+
+source_group(${path} FILES ${FILE_DIR_CPP})
+SET(PROJECT_SOURCES ${PROJECT_SOURCES} ${FILE_DIR_CPP} PARENT_SCOPE)
+
+ENDFUNCTION(FIND_SOURCES)
+
+#---------------------------------------------------------------------------
+
+FUNCTION(FIND_HEADERS path)
+FILE(GLOB LISTS_DIR RELATIVE ${path} ${path}/*)
+
+FOREACH (DIR ${LISTS_DIR})
+	IF(IS_DIRECTORY ${path}/${DIR})
+		FIND_HEADERS(${path}/${DIR})
+	ENDIF()
+ENDFOREACH(DIR)
+
+file(GLOB FILE_DIR_H "${path}/*.h")
+
+STRING(REGEX REPLACE ${PROJECT_ROOT} "" path ${path})
+STRING(REGEX REPLACE "/" "\\\\" path ${path})
+
+source_group(${path} FILES ${FILE_DIR_H})
+SET(PROJECT_HEADERS ${PROJECT_HEADERS} ${FILE_DIR_H} PARENT_SCOPE)
+
+ENDFUNCTION(FIND_HEADERS)

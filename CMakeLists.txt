@@ -5,44 +5,36 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
 SET( LIB SiTNetwork )
 SET( PROJECT_ROOT "${CMAKE_SOURCE_DIR}/" )
 
-SET( LIB_INSTALL_PATH /usr/local/lib )
-SET( HEADERS_INSTALL_PATH /usr/local/include/SiTNetwork )
-
 SET( MAJOR_VERSION 1.0.0 )
 SET( MINOR_VERSION 1.0 )
 
-IF(UNIX AND NOT APPLE)
-    SET(LINUX ON)
-ENDIF(UNIX AND NOT APPLE)
+include(shared)
+IS_LINUX()
+
+
+IF(LINUX)
+ADDDEF(LINUX)
+SET( LIB_INSTALL_PATH /usr/local/lib )
+SET( HEADERS_INSTALL_PATH /usr/local/include/SiTNetwork )
+ENDIF(LINUX)
 
 IF(WIN32)
-	MESSAGE(SEND_ERROR "WINDOWS is unsupported yet ;)")
+ADDDEF(WINDOWS)
+SET( LIB_INSTALL_PATH c:/windows/system32)
+SET( HEADERS_INSTALL_PATH /include)
 ENDIF(WIN32)
 
 #--------------------------------------------------------------------
 # Set source files.
 #--------------------------------------------------------------------
-AUX_SOURCE_DIRECTORY( ${PROJECT_ROOT}/source SOURCES )
-AUX_SOURCE_DIRECTORY( ${PROJECT_ROOT}/source/Network SOURCES_NETWORK )
-AUX_SOURCE_DIRECTORY( ${PROJECT_ROOT}/source/Network/Client SOURCES_NETWORK_CLIENT )
-AUX_SOURCE_DIRECTORY( ${PROJECT_ROOT}/source/Network/Server SOURCES_NETWORK_SERVER )
-AUX_SOURCE_DIRECTORY( ${PROJECT_ROOT}/source/Http SOURCES_HTTP )
-AUX_SOURCE_DIRECTORY( ${PROJECT_ROOT}/source/Http/Client SOURCES_HTTP_CLIENT )
-AUX_SOURCE_DIRECTORY( ${PROJECT_ROOT}/source/Http/Server SOURCES_HTTP_SERVER )
+include(FindSourceProject)
+FIND_SOURCES(${PROJECT_ROOT}source)
 
-SET(PROJECT_SOURCES
-    ${SOURCES}
-    ${SOURCES_NETWORK}
-    ${SOURCES_NETWORK_CLIENT}
-    ${SOURCES_NETWORK_SERVER}
-    ${SOURCES_HTTP}
-    ${SOURCES_HTTP_CLIENT}
-    ${SOURCES_HTTP_SERVER}
-)
 #--------------------------------------------------------------------
 # Set include.
 #--------------------------------------------------------------------
-SET( HEADERS ${PROJECT_ROOT}/include/ )
+FIND_HEADERS(${PROJECT_ROOT}include)
+SET( HEADERS ${PROJECT_ROOT}include/ )
 
 #--------------------------------------------------------------------
 # Set Threads.
@@ -65,13 +57,15 @@ SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} -ldl)
 #--------------------------------------------------------------------
 # Compile
 #--------------------------------------------------------------------
+IF(NOT MSVC)
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -o0 -g3 -std=c++11")
+ENDIF()
 
 INCLUDE_DIRECTORIES(${HEADERS})
 LINK_DIRECTORIES( ${LIB_INSTALL_PATH} )
 
-ADD_LIBRARY( ${LIB} STATIC ${PROJECT_SOURCES})
-#ADD_EXECUTABLE( ${LIB} ${PROJECT_SOURCES} )
+ADD_LIBRARY( ${LIB} STATIC ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+#ADD_EXECUTABLE( ${LIB} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
 TARGET_LINK_LIBRARIES( ${LIB} ${REQUIRED_LIBRARIES})
 

@@ -6,7 +6,8 @@
 
 #ifdef WINDOWS
 #include <winsock2.h> 
-#pragma comment(lib, "WS2_32")   
+#pragma comment(lib, "WS2_32")
+typedef SSIZE_T ssize_t;
 #else
 #include <arpa/inet.h>
 typedef int SOCKET;

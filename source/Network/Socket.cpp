@@ -1,7 +1,13 @@
 #include "Network/Socket.h"
 #include <string.h>
+
+#ifdef WINDOWS
+#include <ws2tcpip.h>
+#include <io.h>
+#else
 #include <unistd.h>
 #include <netdb.h>
+#endif
 
 #include <openssl/x509.h>
 #include <openssl/pem.h>
@@ -75,11 +81,11 @@ void Socket::destroySSL()
 
 bool Socket::create()
 {
-#ifdef _WIN32
+#ifdef WINDOWS
     WSADATA         WsaData;
     int err = WSAStartup (0x0101, &WsaData);
     if(err!=0)
-	throw RuntimeError();
+		return false;
 #endif
 
     switch(_type_protocol)
@@ -92,11 +98,11 @@ bool Socket::create()
 	    break;
     }
 
-#ifdef _WIN32
+#ifdef WINDOWS
     if (_socket == INVALID_SOCKET)
     {
 	WSACleanup();
-	throw RuntimeError("Could not create socket");
+	return false;
     }
 #else
     if (_socket == SOCKET_ERROR)
@@ -113,7 +119,7 @@ bool Socket::create()
 	case SERVER:
 	{
 	    const int on = 1;
-	    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on) == -1)
+	    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof on) == -1)
 	    {
 		return false;
 	    }
@@ -121,7 +127,7 @@ bool Socket::create()
 	    if( bind(_socket, (struct sockaddr*)&_socketaddr , sizeof(_socketaddr)) < 0)
 	    {
 		close();
-#ifdef _WIN32
+#ifdef WINDOWS
 		WSACleanup();
 #endif
 		return false;
@@ -132,7 +138,7 @@ bool Socket::create()
 		if (listen(_socket , DEFAULT_LISTEN_LEN) < 0 )
 		{
 		    close();
-#ifdef _WIN32
+#ifdef WINDOWS
 		    WSACleanup();
 #endif
 		    return false;
@@ -176,7 +182,7 @@ bool Socket::create()
 
 void Socket::close()
 {
-#ifdef _WIN32
+#ifdef WINDOWS
     closesocket(_socket);
 #else
     ::close(_socket);
@@ -300,7 +306,7 @@ ssize_t Socket::send(const void* buffer, size_t n, int flags)
     }
     else
     {
-	ret = ::send(getSocket(), buffer, n, flags);
+	ret = ::send(getSocket(), (char*)buffer, n, flags);
     }
 
     return ret;
@@ -328,7 +334,7 @@ ssize_t Socket::read(void* buffer, size_t n, int flags)
     }
     else
     {
-	ret = recv(getSocket(), buffer, n, flags);
+	ret = recv(getSocket(), (char*)buffer, n, flags);
     }
 
     return ret;

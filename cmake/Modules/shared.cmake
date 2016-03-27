@@ -1,0 +1,10 @@
+function(ADDDEF def)
+add_definitions(-d${def})
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${def})
+endfunction(ADDDEF)
+
+function(IS_LINUX)
+IF(UNIX AND NOT APPLE)
+    SET(LINUX ON PARENT_SCOPE)
+ENDIF(UNIX AND NOT APPLE)
+endfunction(IS_LINUX)

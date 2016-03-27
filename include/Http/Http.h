@@ -30,7 +30,7 @@ namespace SiTNetwork
 	    HEAD = 2,
 	    POST = 3,
 	    PUT = 4,
-	    DELETE = 5,
+	    DELETE_METHOD = 5,
 	    TRACE = 6,
 	    CONNECT = 7,
 	    COUNT = 8
