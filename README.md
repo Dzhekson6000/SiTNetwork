@@ -12,7 +12,9 @@ Socket C++ lib.
   * Use OpenSSL  
 Windows: [install](http://slproweb.com/products/Win32OpenSSL.html)  
 Ubuntu:  
+
     sudo apt-get install openssl
+
   * Use Threads
 
 ***
