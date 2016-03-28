@@ -10,15 +10,23 @@ Socket C++ lib.
 ***
 #### Use Libs:
   * Use OpenSSL  
-Windows: [install](http://slproweb.com/products/Win32OpenSSL.html)  
-Ubuntu:  
-
-    sudo apt-get install openssl
-
   * Use Threads
 
 ***
+#### install:
+run:
+
+    install.py
+
+***
 #### Build:
+Windows:
+
+    mkdir build
+    cd build
+    cmake ..
+    open gen project
+
 Ubuntu:
 
     ./build.sh
