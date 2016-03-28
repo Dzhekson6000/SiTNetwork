@@ -13,7 +13,6 @@ IS_LINUX()
 
 
 IF(LINUX)
-ADDDEF(LINUX)
 SET( LIB_INSTALL_PATH /usr/local/lib )
 SET( HEADERS_INSTALL_PATH /usr/local/include/SiTNetwork )
 ENDIF(LINUX)
