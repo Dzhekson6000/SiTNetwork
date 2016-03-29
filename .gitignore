@@ -17,6 +17,7 @@
 .settings
 build
 *~
+lib
 
 # Ignore files build by Visual Studio
 *.obj

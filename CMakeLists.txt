@@ -8,6 +8,7 @@ SET( PROJECT_ROOT "${CMAKE_SOURCE_DIR}/" )
 SET( MAJOR_VERSION 1.0.0 )
 SET( MINOR_VERSION 1.0 )
 
+include(ExternalProject)
 include(shared)
 IS_LINUX()
 
@@ -44,14 +45,39 @@ SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 #--------------------------------------------------------------------
 # Set OpenSSL.
 #--------------------------------------------------------------------
-find_package (OpenSSL REQUIRED)
-SET( HEADERS ${HEADERS} ${OPENSSL_INCLUDE_DIR})
-SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} ${OPENSSL_LIBRARIES})
+IF(NOT EXISTS ${PROJECT_ROOT}lib/OpenSSL)
+ExternalProject_Add(
+        OpenSSL
+        GIT_REPOSITORY "https://github.com/openssl/openssl.git"
+	PREFIX ${PROJECT_ROOT}lib/OpenSSL
+	CONFIGURE_COMMAND ./config -fPIC --prefix=${PROJECT_ROOT}lib/OpenSSL
+	BUILD_COMMAND make depend && make
+	INSTALL_COMMAND make install
+	BUILD_IN_SOURCE 1
+)
+ENDIF()
+
+IF(LINUX)
+add_library(OpenSSL STATIC IMPORTED)
+set_property(TARGET OpenSSL PROPERTY
+    IMPORTED_LOCATION ${PROJECT_ROOT}lib/OpenSSL/lib/libssl.a)
+
+add_library(crypto STATIC IMPORTED)
+set_property(TARGET crypto PROPERTY
+    IMPORTED_LOCATION ${PROJECT_ROOT}lib/OpenSSL/lib/libcrypto.a)
+ENDIF(LINUX)
+
+SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} OpenSSL)
+SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} crypto)
+
+SET( HEADERS ${HEADERS} ${PROJECT_ROOT}lib/OpenSSL/include)
 
 #--------------------------------------------------------------------
 # Set DL.
 #--------------------------------------------------------------------
+IF(LINUX)
 SET( REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} -ldl)
+ENDIF(LINUX)
 
 #--------------------------------------------------------------------
 # Compile
@@ -64,7 +90,6 @@ INCLUDE_DIRECTORIES(${HEADERS})
 LINK_DIRECTORIES( ${LIB_INSTALL_PATH} )
 
 ADD_LIBRARY( ${LIB} STATIC ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-#ADD_EXECUTABLE( ${LIB} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
 TARGET_LINK_LIBRARIES( ${LIB} ${REQUIRED_LIBRARIES})
 
@@ -74,7 +99,7 @@ SET_TARGET_PROPERTIES(${LIB}
 	SOVERSION ${MINOR_VERSION}
 )
 
-INSTALL( TARGETS ${LIB} DESTINATION ${LIB_INSTALL_PATH} )
+INSTALL( TARGETS ${LIB} DESTINATION lib )
 INSTALL( DIRECTORY ${PROJECT_ROOT}/include/
-         DESTINATION ${HEADERS_INSTALL_PATH}
+         DESTINATION include/SiTNetwork
          FILES_MATCHING PATTERN "*.h" )
