@@ -1,8 +1,6 @@
-#include "Http/HttpSocketClient.h"
-#include <sstream>
-#include <string.h>
+#include "HttpSocketClient.h"
 
-using namespace SiTNetwork;
+using namespace doxyCraft;
 
 HttpSocketClient::HttpSocketClient()
 {

@@ -1,7 +1,8 @@
-#include "Network/Server/ServerClient.h"
+#include "ServerClient.h"
+#include "../Socket.h"
 #include <thread>
 
-using namespace SiTNetwork;
+using namespace doxyCraft;
 
 ServerClient::ServerClient(Socket* socketClient):
 _socketClient(socketClient)

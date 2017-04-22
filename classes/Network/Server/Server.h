@@ -1,7 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <string.h>
+#include "Shared/Types/String/String.h"
 #include <functional>
 #include "ServerClient.h"
 
@@ -9,9 +9,9 @@
 #define NET_CALLBACK_2(func, _Object) std::bind(&func,_Object, std::placeholders::_1, std::placeholders::_2)
 #define NET_CALLBACK_3(func, _Object) std::bind(&func,_Object, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
 
-namespace SiTNetwork
+namespace doxyCraft
 {
-    typedef std::function<void(std::string)>		OnLogFunc;
+    typedef std::function<void(String)>		OnLogFunc;
     typedef std::function<void(Socket* clientSocket)>	OnNewClientFunc;
     class Server
     {
@@ -33,7 +33,7 @@ namespace SiTNetwork
 	bool		_isUseSSL;
 	int		_port;
 	bool		_isClose;
-	void		log(std::string message);
+	void		log(String message);
 	void		newClient(Socket* socketClient);
 
 	OnLogFunc	_onLogFunc;

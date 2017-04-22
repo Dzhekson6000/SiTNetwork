@@ -1,10 +1,10 @@
 #ifndef HTTPSOCKETCLIENT_H
 #define HTTPSOCKETCLIENT_H
-#include "Network/Socket.h"
+#include "../Network/Socket.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 
-namespace SiTNetwork
+namespace doxyCraft
 {
     class HttpSocketClient: public Socket
     {

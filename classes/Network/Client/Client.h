@@ -1,15 +1,15 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <string>
+#include "Shared/Types/String/String.h"
 
-namespace SiTNetwork
+namespace doxyCraft
 {
     class Client
     {
     public:
 	Client();
-	Client(std::string host, int port);
+	Client(String host, int port);
 	virtual	~Client();
     private:
     } ;

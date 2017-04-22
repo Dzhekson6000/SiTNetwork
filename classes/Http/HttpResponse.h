@@ -1,9 +1,9 @@
 #ifndef HTTPRESPONSE_H
 #define HTTPRESPONSE_H
-#include "Http/Http.h"
+#include "Http.h"
 #include <map>
 
-namespace SiTNetwork
+namespace doxyCraft
 {
     class HttpResponse: public Http
     {
@@ -12,20 +12,20 @@ namespace SiTNetwork
 	HttpResponse();
 	virtual		    ~HttpResponse();
 
-	std::string*	    gen();
-	bool		    parseBody(const std::string &line);
+	String* gen();
+	bool		    parseBody(const String &line);
 
 	void		    setStatus(unsigned int status);
-	void		    setBody(const std::string &body);
+	void		    setBody(const String &body);
 
 	unsigned int	    getStatus();
 	static const char*  getStatus(int status);
     protected:
 	unsigned int	    _status;
 	static mapStatus    _statuses;
-	std::string	    _bodyResponse;
+	String	    _bodyResponse;
 
-	bool		    parseStartingLine(const std::string &line);
+	bool		    parseStartingLine(const String &line);
     } ;
 }
 

@@ -1,8 +1,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
-#include "Network/Socket.h"
+#include "../Socket.h"
 
-namespace SiTNetwork
+namespace doxyCraft
 {
     class ServerClient
     {

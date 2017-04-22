@@ -1,9 +1,9 @@
 #ifndef HTTPSERVERCLIENT_H
 #define HTTPSERVERCLIENT_H
-#include "Network/Server/ServerClient.h"
-#include "Http/HttpRequest.h"
+#include "../Network/Server/ServerClient.h"
+#include "HttpRequest.h"
 
-namespace SiTNetwork
+namespace doxyCraft
 {
     class HttpServerClient: public ServerClient
     {

@@ -1,9 +1,9 @@
 #ifndef HTTPREQUEST_H
 #define HTTPREQUEST_H
 
-#include "Http/Http.h"
+#include "Http.h"
 
-namespace SiTNetwork
+namespace doxyCraft
 {
     class HttpRequest: public Http
     {
@@ -11,10 +11,10 @@ namespace SiTNetwork
 	HttpRequest();
 	virtual		~HttpRequest();
 
-	std::string*	gen();
-	bool		parseBody(const std::string &line);
+	String* gen();
+	bool		parseBody(const String &line);
     protected:
-	bool		parseStartingLine(const std::string &line);
+	bool		parseStartingLine(const String &line);
     } ;
 }
 

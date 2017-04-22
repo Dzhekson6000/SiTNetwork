@@ -1,21 +1,22 @@
-#include "Network/Server/Server.h"
+#include "Server.h"
+#include "../Socket.h"
 #include <thread>
 
-using namespace SiTNetwork;
+using namespace doxyCraft;
 
 Server::Server():
+_isUseSSL(false),
 _port(0),
-_onLogFunc(nullptr),
 _isClose(false),
-_isUseSSL(false)
+_onLogFunc(nullptr)
 {
 }
 
 Server::Server(int port):
+_isUseSSL(false),
 _port(port),
-_onLogFunc(nullptr),
 _isClose(false),
-_isUseSSL(false)
+_onLogFunc(nullptr)
 {
 }
 
@@ -54,7 +55,7 @@ void Server::stop()
     _isClose = true;
 }
 
-void Server::log(std::string message)
+void Server::log(String message)
 {
     if(_onLogFunc)_onLogFunc(message);
 }

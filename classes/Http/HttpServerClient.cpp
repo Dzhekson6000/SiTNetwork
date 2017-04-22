@@ -1,7 +1,7 @@
-#include "Http/HttpServerClient.h"
-#include "Http/HttpSocketServer.h"
+#include "HttpServerClient.h"
+#include "HttpSocketServer.h"
 
-using namespace SiTNetwork;
+using namespace doxyCraft;
 
 HttpServerClient::HttpServerClient(Socket* socketClient):
 ServerClient(socketClient)
@@ -20,15 +20,18 @@ void HttpServerClient::thread()
     bool isKeepAlive = true;
     while(!isStop && isKeepAlive)
     {
-	if(!((HttpSocketServer*)_socketClient)->read(httpRequest)) return;
-	isStop = cameData(httpRequest);
-	isKeepAlive = httpRequest.isKeepAlive();
+		if (!((HttpSocketServer*)_socketClient)->read(httpRequest))
+		{
+			return;
+		}
+		isStop = cameData(httpRequest);
+		isKeepAlive = httpRequest.isKeepAlive();
     }
 }
 
 bool HttpServerClient::cameData(const HttpRequest& httpRequest)
 {
-    return true;
+    return true; //WTF?
 }
 
 

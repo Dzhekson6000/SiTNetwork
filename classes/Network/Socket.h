@@ -20,7 +20,7 @@ typedef int SOCKET;
 
 #define DEFAULT_TIMEOUT_READ 1024
 
-namespace SiTNetwork
+namespace doxyCraft
 {
     class Socket
     {
@@ -79,7 +79,6 @@ namespace SiTNetwork
 	TYPE_PROTOCOL	    _type_protocol;
 	
 	time_t		    _timeoutRead;
-	time_t		    _lastReadTime;
 
 	void		    createAddres();
 	unsigned long	    getHostAddress(const char* host);

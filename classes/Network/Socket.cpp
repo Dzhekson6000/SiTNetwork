@@ -1,4 +1,4 @@
-#include "Network/Socket.h"
+#include "Socket.h"
 #include <string.h>
 
 #ifdef WINDOWS
@@ -10,27 +10,26 @@
 #endif
 
 #include <openssl/x509.h>
-#include <openssl/pem.h>
 #include <openssl/ssl.h>
-#include <openssl/err.h>
 
-using namespace SiTNetwork;
+using namespace doxyCraft;
 
-Socket::Socket():_socket(0), _host(nullptr), _port(DEFAULT_PORT),
-_bufferSize(DEFAULT_BUFFER_SIZE), _isUseSSL(false),
-_timeoutRead(DEFAULT_TIMEOUT_READ), _lastReadTime(0)
+Socket::Socket():_bufferSize(DEFAULT_BUFFER_SIZE), _socket(0), _host(nullptr),
+ _port(DEFAULT_PORT), _isUseSSL(false),
+_timeoutRead(DEFAULT_TIMEOUT_READ)
 {
 }
 
-Socket::Socket(int port):_socket(0), _host(nullptr), _port(port),
-_bufferSize(DEFAULT_BUFFER_SIZE), _isUseSSL(false),
-_timeoutRead(DEFAULT_TIMEOUT_READ), _lastReadTime(0)
+Socket::Socket(int port):_bufferSize(DEFAULT_BUFFER_SIZE), _socket(0), _host(nullptr),
+_port(port), _isUseSSL(false),
+_timeoutRead(DEFAULT_TIMEOUT_READ)
 {
 }
 
-Socket::Socket(const char *host, int port):_socket(0), _host(host), _port(port),
-_bufferSize(DEFAULT_BUFFER_SIZE), _isUseSSL(false),
-_timeoutRead(DEFAULT_TIMEOUT_READ), _lastReadTime(0)
+Socket::Socket(const char *host, int port):_bufferSize(DEFAULT_BUFFER_SIZE), _socket(0), _host(host),
+_port(port),
+_isUseSSL(false),
+_timeoutRead(DEFAULT_TIMEOUT_READ)
 {
 }
 
@@ -132,7 +131,7 @@ bool Socket::create()
 #endif
 		return false;
 	    }
-
+	    
 	    if(_type_protocol == TCP)
 	    {
 		if (listen(_socket , DEFAULT_LISTEN_LEN) < 0 )
@@ -215,7 +214,7 @@ bool Socket::accept(const Socket& socket)
 
 void Socket::createAddres()
 {
-    memset(&_socketaddr, sizeof(_socketaddr), 0);
+    memset(&_socketaddr, 0, sizeof(_socketaddr));
     _socketaddr.sin_family = AF_INET;
     switch(_type_socket)
     {
@@ -342,7 +341,7 @@ ssize_t Socket::read(void* buffer, size_t n, int flags)
 
 bool Socket::sendFile(std::string path)
 {
-    FILE *file = fopen(path.c_str(), "r");
+    FILE *file = fopen(path.c_str(), "rb");
     if (file == NULL)return false;
 
     unsigned char buffer[1024];
